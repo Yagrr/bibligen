@@ -1,9 +1,9 @@
-from app import App, ContentFrame
+from app import App, UserInterface
 
 
 def main():
     app = App()
-    frame = ContentFrame(app)
+    frame = UserInterface(app)
     app.mainloop()
 
 if __name__ == "__main__":

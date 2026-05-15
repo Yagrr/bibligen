@@ -1,6 +1,6 @@
+from typing import Callable
 import tkinter as tk
-import tkinter.ttk as ttk
-from tkinter.messagebox import showinfo
+import ttkbootstrap as ttk
 
 from config.settings import (
     WINDOW_TITLE,
@@ -8,12 +8,14 @@ from config.settings import (
     HEIGHT_WINDOW,
 )
 
+from gui.reference_generator import ContainerRefGen
+
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        # Window configuration
+        # Window configuration - dimensions and position
         self.title(WINDOW_TITLE)
         self.geometry(f'{WIDTH_WINDOW}x{HEIGHT_WINDOW}')
         self.update_idletasks()
@@ -21,42 +23,40 @@ class App(tk.Tk):
         y = (self.winfo_screenheight() // 2) - (self.winfo_height() // 2)
         self.geometry(f'+{x}+{y}')
 
-
-        self.parent_frame = ContentFrame(self)
+        self.parent_frame = UserInterface(self)
         self.parent_frame.pack(fill=tk.BOTH, expand=True)
 
-class ContentFrame(ttk.Frame):
+
+class UserInterface(ttk.Frame):
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
-        self.setup_layout()
-        self.create_children()
-        self._show_layout()
+        self.gui_setup_grid_layout()
+        self.gui_create_frames()
+        self._gui_show_layout()
 
-    def setup_layout(self):
+    def gui_setup_grid_layout(self):
+        # 3x2 grid layout
         self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=2)
-        self.columnconfigure(0, weight = 1)
-        self.columnconfigure(1, weight = 1)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
-    def create_children(self):
-        # Create place_holders to indicate layout
+    def gui_create_frames(self):
+        # Invoke containers to initialise app
+        # TODO: Create the rest of the containers
+        self.frame_left = ContainerRefGen(self, padding="15") 
+
+        self.frame_left.grid(column=0, row=0, sticky="nsew", rowspan=3)
         ...
 
-    def _show_layout(self):
-        self.label = ttk.Label(self, text="User inputs", background="red", anchor="center")
-        self.label.grid(column=0, row=0, sticky="nsew", rowspan=2)
-        self.label_2 = ttk.Label(self, text="Console", background="orange", anchor="center")
-        self.label_2.grid(column=1, row=0, sticky="nsew", rowspan=1)
-        self.label_3 = ttk.Label(self, text="Output display", background="green", anchor="center")
-        self.label_3.grid(column=1, row=1, sticky="nsew", rowspan=2)
+    def _gui_show_layout(self):
+        # Visualising widget placement for testing
+        self.label_refgen = ttk.Label(self, text="User inputs", background="red", anchor="center")
+        self.label_bibtex_output = ttk.Label(self, text="Output display", background="green", anchor="center")
+        self.label_console = ttk.Label(self, text="Console", background="orange", anchor="center")
 
-    def button_clicked(self):
-        showinfo(title="Information", message="Hello, user!")
-
-
-class FrameCommunicationManager():
-    def __init__(self):
-        self.listeners = {}
-    # Allow user inputs, allow self destruct.
-    ...
+        # self.label_refgen.grid(column=0, row=0, sticky="nsew", rowspan=3)
+        self.label_bibtex_output.grid(column=1, row=0, sticky="nsew", rowspan=2)
+        self.label_console.grid(column=1, row=2, sticky="nsew", rowspan=1)
