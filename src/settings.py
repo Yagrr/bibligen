@@ -6,12 +6,15 @@ WINDOW_TITLE = "bibligen"
 WIDTH_WINDOW = 1500
 HEIGHT_WINDOW = 1000
 
-REFGEN_MAX_FIELDS = 15
-
 THEME = "darkly"
 FONT = "TkFixedFont"
 FONT_SIZE = 14
 
 DEFAULT_REFERENCE_TYPE = ReferenceType.REPORT
 DEFAULT_START = 0
-DEFAULT_ITERATION_NUMBER = 1
+DEFAULT_ITERATIONS = 1
+# Double square brackets, only capturing digit inside
+DEFAULT_PATTERN = r"(?:\[\[)\d+(?:\]\])"
+
+REFGEN_MAX_ITERATIONS = 50
+REFGEN_MAX_FIELDS = 15
