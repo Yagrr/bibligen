@@ -1,12 +1,13 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 
-from ..config.settings import REFGEN_MAX_FIELDS
+from .settings import REFGEN_MAX_FIELDS, FONT, FONT_SIZE
+from .reference_model import ModelReferenceDatabase
 
 class ContainerRefGen(ttk.Frame):
     """
-    Parent GUI Frame container to contain reference generator options container
-    and the reference fields container.
+    Parent GUI Frame container to contain "reference generator options" container
+    and the "reference fields" container.
     """
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
@@ -22,20 +23,68 @@ class ContainerRefGen(ttk.Frame):
         ...
 
     def gui_create_frames(self):
+        # To rename function to initialise
+        self.ui_refgen_options = ViewRefGenOptions(self)
         self.ui_refgen_fields = ViewRefGenFields(self)
+        # add options
         ...
+
+    def initialise_mvc(self):
+        self.refgen_controller = ControllerReferenceGenerator(ModelReferenceDatabase(), self.ui_refgen_options, self.ui_refgen_fields)
 
     def _gui_show_layout(self):
         # Visualise widget placement for testing
-        self.label_refgen_options = ttk.Label(self, text="Reference generator options", background="blue", anchor="center")
+        self.label_refgen_options = ttk.Label(self, text="Reference generator options", background="blue", anchor="center") 
         self.label_refgen_fields = ttk.Label(self, text="User input fields", background="purple", anchor="center")
 
         self.label_refgen_options.grid(column=0, row=0, sticky="nsew")
         self.label_refgen_fields.grid(column=0, row=1, sticky="nsew")
 
+
 class ViewRefGenOptions(ttk.Frame):
     #TODO: Implement frame with buttons
-    ...
+    def __init__(self, controller, container=None, **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent = container
+        self.controller: ControllerReferenceGenerator = controller
+        self.gui_setup_grid_layout()
+
+        self.ui_header_iteration_settings = ttk.Label(self, text="Preview")
+
+    # setup layout
+    def gui_setup_grid_layout(self):
+        # Create 4x4 layout
+        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=2)
+        self.rowconfigure(2, weight=1)
+        self.rowconfigure(3, weight=2)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=2)
+        self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+
+    def gui_create_frames(self):
+        ...
+
+    def gui_setup_iteration_settings(self):
+        self.ui_header_iteration_settings = ttk.Label(self, text="Iteration settings")
+        self.ui_label_integer_start = ttk.Label(self, text="Start:")
+        self.ui_label_number_iterations = ttk.Label(self, text="N° of iterations")
+        self.ui_label_number_end = ttk.Label(self, text="End:")
+        #TODO: On interaction, update end_year label. via controller
+
+        self.number_iterations = tk.StringVar(self.ui_number_iterations, "1")
+        self.ui_number_iterations = ttk.Spinbox(
+            self, 
+            from_=1, 
+            to=30, 
+            textvariable=self.number_iterations, 
+            wrap=True,
+        )
+
+    def gui_setup_preview(self):
+        ...
+
 
 class ViewRefGenFields(ttk.Frame):
     def __init__(self, container=None, **kw):
@@ -47,11 +96,11 @@ class ViewRefGenFields(ttk.Frame):
 
         self.gui_setup_scrollbar()
 
-    # TODO: Setup grid for canvas. Maybe place +field at the bottom of canvas
+    # TODO: Setup grid for ui_canvas. Maybe place +field at the bottom of canvas
 
     def gui_setup_scrollbar(self):
         """ 
-        Create scrollable frame with Canvas to contain field entries.
+        Create scrollable frame with ui_canvas to contain field entries.
         This is needed as different document types will have different numbers
         of fields.
         """
@@ -87,10 +136,25 @@ class ViewRefGenFields(ttk.Frame):
 
 
 class ControllerReferenceGenerator:
-    def __init__(self, model, view):
+    """
+    Element linking model component to the UI state and user interactions.
+    If X button is clicked, then Y happens to internal data.
+    """
+    def __init__(self, model: ModelReferenceDatabase, view_options: ViewRefGenOptions, view_fields: ViewRefGenFields):
         self.model = model
-        self.view = view
+        self.view_options = view_options
+        self.view_fields = view_fields
     # TODO: Create custom logic to setup interactions between model and view
     # Allows user interactions to bind to internal data as per MVC framework.
     # 1. Not sure if models and views should be implemented as dictionary
     # 2. Not sure if this should be placed in app.py as this will communicate between widgets
+    #self.view.add_callback("get_number_iterations", self.)
+        """ Register a ttk.Frame object to mediator """
+
+    def update_options_iterations_start(self):
+        ...
+
+    def update_option_iteration_number(self):
+        # If reference in database is less than iteration number, then delete.
+        ...
+    # def update_field(self):

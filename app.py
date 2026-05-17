@@ -48,7 +48,6 @@ class UserInterface(ttk.Frame):
         self.frame_left = ContainerRefGen(self, padding="15") 
 
         self.frame_left.grid(column=0, row=0, sticky="nsew", rowspan=3)
-        
         ...
 
     def _gui_show_layout(self):
