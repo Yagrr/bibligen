@@ -1,20 +1,19 @@
-from typing import Callable
 import tkinter as tk
 import ttkbootstrap as ttk
 
-from config.settings import (
+from src.settings import (
     WINDOW_TITLE,
     WIDTH_WINDOW,
     HEIGHT_WINDOW,
+    THEME,
 )
 
-from gui.reference_generator import ContainerRefGen
+from src.reference_generator import ContainerRefGen
 
 
-class App(tk.Tk):
+class App(ttk.Window):
     def __init__(self):
-        super().__init__()
-
+        super().__init__(themename=THEME)
         # Window configuration - dimensions and position
         self.title(WINDOW_TITLE)
         self.geometry(f'{WIDTH_WINDOW}x{HEIGHT_WINDOW}')
@@ -49,6 +48,7 @@ class UserInterface(ttk.Frame):
         self.frame_left = ContainerRefGen(self, padding="15") 
 
         self.frame_left.grid(column=0, row=0, sticky="nsew", rowspan=3)
+        
         ...
 
     def _gui_show_layout(self):
