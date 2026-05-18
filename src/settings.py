@@ -1,5 +1,3 @@
-from .reference_model import ReferenceType
-
 """ App settings and configurations """
 
 WINDOW_TITLE = "bibligen"
@@ -10,7 +8,6 @@ THEME = "darkly"
 FONT = "TkFixedFont"
 FONT_SIZE = 14
 
-DEFAULT_REFERENCE_TYPE = ReferenceType.REPORT
 DEFAULT_START = 0
 DEFAULT_ITERATIONS = 1
 # Double square brackets, only capturing digit inside
