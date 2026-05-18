@@ -8,7 +8,7 @@ from src.settings import (
     THEME,
 )
 
-from src.reference_generator import ContainerRefGen
+from src.reference_generator import WrapperRefGen
 
 
 class App(ttk.Window):
@@ -22,14 +22,13 @@ class App(ttk.Window):
         y = (self.winfo_screenheight() // 2) - (self.winfo_height() // 2)
         self.geometry(f'+{x}+{y}')
 
-        self.parent_frame = UserInterface(self)
-        self.parent_frame.pack(fill=tk.BOTH, expand=True)
-
-
 class UserInterface(ttk.Frame):
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
+        # Setup position in window
+        self.pack(expand=True, fill=tk.BOTH)
+
         self.gui_setup_grid_layout()
         self.gui_create_frames()
         self._gui_show_layout()
@@ -44,18 +43,15 @@ class UserInterface(ttk.Frame):
 
     def gui_create_frames(self):
         # Invoke containers to initialise app
-        # TODO: Create the rest of the containers
-        self.frame_left = ContainerRefGen(self, padding="15") 
-
+        self.frame_left = WrapperRefGen(self, padding="15") 
         self.frame_left.grid(column=0, row=0, sticky="nsew", rowspan=3)
-        ...
 
     def _gui_show_layout(self):
         # Visualising widget placement for testing
-        self.label_refgen = ttk.Label(self, text="User inputs", background="red", anchor="center")
+        #self.label_refgen = ttk.Label(self, text="User inputs", background="red", anchor="center")
         self.label_bibtex_output = ttk.Label(self, text="Output display", background="green", anchor="center")
         self.label_console = ttk.Label(self, text="Console", background="orange", anchor="center")
 
-        # self.label_refgen.grid(column=0, row=0, sticky="nsew", rowspan=3)
+        #self.label_refgen.grid(column=0, row=0, sticky="nsew", rowspan=3)
         self.label_bibtex_output.grid(column=1, row=0, sticky="nsew", rowspan=2)
         self.label_console.grid(column=1, row=2, sticky="nsew", rowspan=1)

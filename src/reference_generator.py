@@ -4,7 +4,8 @@ import ttkbootstrap as ttk
 from .settings import REFGEN_MAX_FIELDS, FONT, FONT_SIZE
 from .reference_model import ModelReferenceDatabase
 
-class ContainerRefGen(ttk.Frame):
+
+class WrapperRefGen(ttk.Frame):
     """
     Parent GUI Frame container to contain "reference generator options" container
     and the "reference fields" container.
@@ -12,25 +13,24 @@ class ContainerRefGen(ttk.Frame):
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
-        # Insert data here
+        self.container_ref_gen = ContainerRefGen(self)
+        self.container_ref_gen.pack(expand=True, fill=tk.BOTH)
+
+
+class ContainerRefGen(ttk.Frame):
+    def __init__(self, container=None, **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent = container
+
         self.gui_setup_grid_layout()
-        self._gui_show_layout()
+        #self._gui_show_layout()
+        self.gui_create_frames()
+        self.initialise_mvc()
 
     def gui_setup_grid_layout(self):
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=3)
         self.columnconfigure(0, weight=1)
-        ...
-
-    def gui_create_frames(self):
-        # To rename function to initialise
-        self.ui_refgen_options = ViewRefGenOptions(self)
-        self.ui_refgen_fields = ViewRefGenFields(self)
-        # add options
-        ...
-
-    def initialise_mvc(self):
-        self.refgen_controller = ControllerReferenceGenerator(ModelReferenceDatabase(), self.ui_refgen_options, self.ui_refgen_fields)
 
     def _gui_show_layout(self):
         # Visualise widget placement for testing
@@ -40,18 +40,47 @@ class ContainerRefGen(ttk.Frame):
         self.label_refgen_options.grid(column=0, row=0, sticky="nsew")
         self.label_refgen_fields.grid(column=0, row=1, sticky="nsew")
 
+    def gui_create_frames(self):
+        self.wrapper_refgen_options = WrapperRefGenOptions(self)
+        self.wrapper_refgen_fields = WrapperRefGenFields(self)
+
+        self.wrapper_refgen_options.grid(column=0, row=0, sticky="nsew")
+        self.wrapper_refgen_fields.grid(column=0, row=1, sticky="nsew")
+
+    def initialise_mvc(self):
+        self.refgen_model = ModelReferenceDatabase()
+        self.view_refgen_options = ViewRefGenOptions()
+        self.view_refgen_fields = ViewRefGenFields()
+        self.controller_refgen = ControllerReferenceGenerator(self.refgen_model, self.view_refgen_options, self.view_refgen_fields)
+        self.view_refgen_fields.controller = self.controller_refgen
+        self.view_refgen_options.controller = self.controller_refgen
+
+class WrapperRefGenOptions(ttk.Frame):
+    """
+        Wrapper for RefGenOptions for placement in parent frame, and to avoid
+        pack() / grid() conflicts.
+    """
+    def __init__(self, container=None, **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent = container
+        self.frame_container = ViewRefGenOptions(self)
+        self.frame_container.pack(expand=True, fill=tk.BOTH)
 
 class ViewRefGenOptions(ttk.Frame):
     #TODO: Implement frame with buttons
-    def __init__(self, controller, container=None, **kw):
+    def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
-        self.controller: ControllerReferenceGenerator = controller
+        self.controller: ControllerReferenceGenerator | None = None
         self.gui_setup_grid_layout()
+        self._gui_show_layout()
+        #self.gui_create_frames()
 
-        self.ui_header_iteration_settings = ttk.Label(self, text="Preview")
 
-    # setup layout
+    def _gui_show_layout(self):
+        self.ui_header_iteration_settings = ttk.Label(self, text="Preview", background="purple", anchor="center")
+        self.ui_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=4, rowspan=4)
+
     def gui_setup_grid_layout(self):
         # Create 4x4 layout
         self.rowconfigure(0, weight=1)
@@ -85,18 +114,42 @@ class ViewRefGenOptions(ttk.Frame):
     def gui_setup_preview(self):
         ...
 
+    def gui_reset(self):
+        ...
+
+class WrapperRefGenFields(ttk.Frame):
+    """
+        Wrapper for RefGenFields for placement in parent frame, and to avoid
+        pack() / grid() conflicts.
+    """
+    def __init__(self, container=None, **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent = container
+        self.frame_container = ViewRefGenFields(self)
+        self.frame_container.pack(expand=True, fill=tk.BOTH)
+
 
 class ViewRefGenFields(ttk.Frame):
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.entries = []
-        self.frame_count = 0 # Used to check for max number of fields.
+        self.ref_count = 0 # Used to check for max number of fields.
         self.parent = container
-        self.ui_canvas = tk.Canvas(container)
+        self.controller: ControllerReferenceGenerator | None = None
+        self.ui_canvas = tk.Canvas(self)
 
-        self.gui_setup_scrollbar()
+        self._gui_show_layout()
+        #self.gui_setup_scrollbar()
+
+        #TODO: Need to figure out how to add widgets to Canvas (entry and button)
+        # Need to create a [field_name] [entry] object
 
     # TODO: Setup grid for ui_canvas. Maybe place +field at the bottom of canvas
+    def _gui_show_layout(self):
+        self.ui_fields = ttk.Label(self, text="Fields", background="blue", anchor="center")
+        #self.ui_fields.grid(column=0, row=0, sticky="nsew", columnspan=4, rowspan=4)
+        self.ui_fields.pack(expand=True, fill=tk.BOTH)
+
 
     def gui_setup_scrollbar(self):
         """ 
@@ -104,14 +157,15 @@ class ViewRefGenFields(ttk.Frame):
         This is needed as different document types will have different numbers
         of fields.
         """
-        self.ui_scrollbar = ttk.Scrollbar(self.parent, orient="veritcal", command=self.ui_canvas.yview)
-        self.ui_scrollable_frame = ttk.Frame(self)
+        self.ui_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.ui_canvas.yview)
         self.ui_canvas.configure(yscrollcommand=self.ui_scrollbar.set)
+
+        self.ui_scrollable_frame = ttk.Frame(self)
 
         self.ui_canvas.pack(side="left", fill="both", expand=True)
         self.ui_scrollbar.pack(side="right", fill="y")
 
-        self.ui_canvas_window = self.canvas.create_window((0, 0), window=self.ui_scrollable_frame, anchor="nw")
+        self.ui_canvas_window = self.ui_canvas.create_window((0, 0), window=self.ui_scrollable_frame, anchor="nw")
         # Bind controls for scrolling
         self.ui_scrollable_frame.bind("<Configure>", self.on_frame_configure)
         self.ui_canvas.bind("<Configure>", self.on_canvas_configure)
