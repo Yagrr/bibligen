@@ -6,4 +6,4 @@ Creating entries in reference managers for annual reports is very time-consuming
 
 ## The solution
 
-Bibligen is a GUI-based .bib generator for quickly creating reference entries in bulk, by allowing iterable values to be placed in the reference entries' fields (declared using `{{value}}`).
+Bibligen is a GUI-based .bib generator for quickly creating reference entries in bulk, by allowing iterable values to be placed in the reference entries' fields (declared using `[[integer_value]]`).
