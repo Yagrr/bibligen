@@ -29,7 +29,7 @@ class ContainerRefGen(ttk.Frame):
 
     def gui_setup_grid_layout(self):
         self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=3)
+        self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
     def _gui_show_layout(self):
@@ -76,19 +76,16 @@ class ViewRefGenOptions(ttk.Frame):
         self._gui_show_layout()
         #self.gui_create_frames()
 
-
-    def _gui_show_layout(self):
-        self.ui_header_iteration_settings = ttk.Label(self, text="Preview", background="purple", anchor="center")
-        self.ui_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=4, rowspan=4)
-
+ 
     def gui_setup_grid_layout(self):
         # Create 4x4 layout
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=2)
         self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=2)
+        self.rowconfigure(3, weight=1)
+        self.rowconfigure(4, weight=1)
         self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=2)
+        self.columnconfigure(1, weight=3)
         self.columnconfigure(2, weight=1)
         self.columnconfigure(3, weight=1)
 
@@ -102,17 +99,65 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_label_number_end = ttk.Label(self, text="End:")
         #TODO: On interaction, update end_year label. via controller
 
-        self.number_iterations = tk.StringVar(self.ui_number_iterations, "1")
-        self.ui_number_iterations = ttk.Spinbox(
-            self, 
-            from_=1, 
-            to=30, 
-            textvariable=self.number_iterations, 
-            wrap=True,
-        )
+        # self.ui_start_value_entry =
+        # self.ui_end_value_label =
 
-    def gui_setup_preview(self):
-        ...
+        # self.number_iterations = tk.StringVar(self.ui_number_iterations, "1")
+
+        # self.ui_number_iterations = ttk.Spinbox(
+        #     self, 
+        #     from_=1, 
+        #     to=30, 
+        #     textvariable=self.number_iterations, 
+        #     wrap=True,
+        # )
+
+        # self.ui_button_generate_entries =
+        # self.ui_button_clear_fields = 
+        # self.ui_label_reference_counter = # [current reference number] out of [last ref number]
+        # self.ui_button_previous_reference = # Toggles preview of next reference
+        # self.ui_button_next_reference =  # Toggles preview of next reference
+
+    def _gui_show_layout(self):
+        #self.ui_header_iteration_settings = ttk.Label(self, text="Preview General", background="purple", anchor="center")
+        #self.ui_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=4, rowspan=4)
+
+        self.ui_layout_iteration_settings = ttk.Label(self, text="Iteration settings", background="purple", anchor="center")
+        self.ui_layout_doctype_label = ttk.Label(self, text="Document type", background="red", anchor="center")
+        self.ui_layout_doctype_dropdown = ttk.Label(self, text="Dropdown here", background="red", anchor="center")
+        self.ui_layout_start_label = ttk.Label(self, text="Start", background="blue", anchor="center")
+        self.ui_layout_start_entry = ttk.Label(self, text="Start entry", background="red", anchor="center")
+        self.ui_layout_step_label = ttk.Label(self, text="Steps", background="blue", anchor="center")
+        self.ui_layout_step_entry = ttk.Label(self, text="Steps entry", background="red", anchor="center")
+        self.ui_layout_end_label = ttk.Label(self, text="End", background="green", anchor="center")
+        self.ui_layout_end_value = ttk.Label(self, text="End value", background="red", anchor="center")
+
+        self.ui_layout_preview_label = ttk.Label(self, text="Preview references", background="grey", anchor="center")
+        self.ui_layout_generate_button = ttk.Label(self, text="Generate button", background="green", anchor="center")
+        self.ui_layout_clear_fields_button = ttk.Label(self, text="Clear fields", background="blue", anchor="center")
+        self.ui_layout_delete_iteration_button = ttk.Label(self, text="Delete iteration", background="black", anchor="center")
+        self.ui_layout_number_iterations_label = ttk.Label(self, text="[1/6]", background="pink", anchor="center")
+        self.ui_layout_previous_iteration_button = ttk.Label(self, text="Previous button here", background="grey", anchor="center")
+        self.ui_layout_next_iteration_button = ttk.Label(self, text="Next button here", background="black", anchor="center")
+
+
+        self.ui_layout_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=2)
+        self.ui_layout_doctype_label.grid(column=0, row=1, sticky="nsew")
+        self.ui_layout_doctype_dropdown.grid(column=1, row=1, sticky="nsew")
+        self.ui_layout_start_label.grid(column=0, row=2, sticky="nsew")
+        self.ui_layout_start_entry.grid(column=1, row=2, sticky="nsew")
+        self.ui_layout_step_label.grid(column=0, row=3, sticky="nsew")
+        self.ui_layout_step_entry.grid(column=1, row=3, sticky="nsew")
+        self.ui_layout_end_label.grid(column=0, row=4, sticky="nsew")
+        self.ui_layout_end_value.grid(column=1, row=4, sticky="nsew")
+
+        self.ui_layout_preview_label.grid(column=2, row=0, sticky="nsew", columnspan=2)
+        self.ui_layout_generate_button.grid(column=2, row=1, sticky="nsew", columnspan=2)
+        self.ui_layout_clear_fields_button.grid(column=2, row=2, sticky="nsew")
+        self.ui_layout_delete_iteration_button.grid(column=3, row=2, sticky="nsew")
+        self.ui_layout_number_iterations_label.grid(column=2, row=3, sticky="nsew", columnspan=2)
+        self.ui_layout_previous_iteration_button.grid(column=2, row=4, sticky="nsew")
+        self.ui_layout_next_iteration_button.grid(column=3, row=4, sticky="nsew")
 
     def gui_reset(self):
         ...
@@ -136,20 +181,28 @@ class ViewRefGenFields(ttk.Frame):
         self.ref_count = 0 # Used to check for max number of fields.
         self.parent = container
         self.controller: ControllerReferenceGenerator | None = None
-        self.ui_canvas = tk.Canvas(self)
+        self.ui_fields_canvas = ttk.Canvas(self)
 
-        self._gui_show_layout()
-        #self.gui_setup_scrollbar()
+        #self._gui_show_layout()
+        self.gui_setup_scrollbar()
+        self.gui_add_fields()
 
         #TODO: Need to figure out how to add widgets to Canvas (entry and button)
         # Need to create a [field_name] [entry] object
 
-    # TODO: Setup grid for ui_canvas. Maybe place +field at the bottom of canvas
+        # TODO: Setup grid for ui_canvas. Maybe place +field at the bottom of canvas
+        # TODO: Create a separate frame object of fixed width for UI fields canvas.
+        # The canvas is purely here to enable scrolling.
+        # Arbitrary width but of fixed height. Used to place fields.
     def _gui_show_layout(self):
         self.ui_fields = ttk.Label(self, text="Fields", background="blue", anchor="center")
         #self.ui_fields.grid(column=0, row=0, sticky="nsew", columnspan=4, rowspan=4)
         self.ui_fields.pack(expand=True, fill=tk.BOTH)
 
+    def gui_add_fields(self):
+        self.test = ttk.Label(self.ui_fields_canvas, text="Hello!", background="blue", anchor="center")
+        self.test.pack(expand=True, fill=tk.BOTH)
+        self.ui_fields_canvas.create_window((100, 1000), window=self.test, anchor="center")
 
     def gui_setup_scrollbar(self):
         """ 
@@ -157,32 +210,31 @@ class ViewRefGenFields(ttk.Frame):
         This is needed as different document types will have different numbers
         of fields.
         """
-        self.ui_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.ui_canvas.yview)
-        self.ui_canvas.configure(yscrollcommand=self.ui_scrollbar.set)
+        self.ui_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.ui_fields_canvas.yview)
+        self.ui_fields_canvas.configure(yscrollcommand=self.ui_scrollbar.set)
 
         self.ui_scrollable_frame = ttk.Frame(self)
 
-        self.ui_canvas.pack(side="left", fill="both", expand=True)
+        self.ui_fields_canvas.pack(side="left", fill="both", expand=True)
         self.ui_scrollbar.pack(side="right", fill="y")
 
-        self.ui_canvas_window = self.ui_canvas.create_window((0, 0), window=self.ui_scrollable_frame, anchor="nw")
+        self.ui_canvas_window = self.ui_fields_canvas.create_window((0, 0), window=self.ui_scrollable_frame, anchor="nw")
         # Bind controls for scrolling
         self.ui_scrollable_frame.bind("<Configure>", self.on_frame_configure)
-        self.ui_canvas.bind("<Configure>", self.on_canvas_configure)
+        self.ui_fields_canvas.bind("<Configure>", self.on_canvas_configure)
         
     def on_frame_configure(self, event):
-        self.ui_canvas.configure(scrollregion=self.ui_canvas.bbox("all"))
+        self.ui_fields_canvas.configure(scrollregion=self.ui_fields_canvas.bbox("all"))
 
     def on_canvas_configure(self, event):
         canvas_width = event.width
-        self.ui_canvas.itemconfig(self.ui_canvas_window, width=canvas_width)
+        self.ui_fields_canvas.itemconfig(self.ui_canvas_window, width=canvas_width)
     
     #TODO:Add entry creation and deletion function.
     def gui_add_entry(self):
         # Check if over REFGEN_MAX_FIELDS
         # Trigger popup if that happens
         self.frame_count += 1
-        pass
 
     def gui_delete_entry(self):
         # Check if over REFGEN_MAX_FIELDS

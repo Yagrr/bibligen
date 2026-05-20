@@ -39,7 +39,7 @@ class UserInterface(ttk.Frame):
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(1, weight=3)
 
     def gui_create_frames(self):
         # Invoke containers to initialise app
