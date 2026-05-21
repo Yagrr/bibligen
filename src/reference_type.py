@@ -1,5 +1,28 @@
 from enum import Enum
 
+""" 
+List of currently supported reference types, for use by GUI
+vars_options_doctype_dropdown 
+"""
+list_reference_types = [
+    "Report",
+    "Misc.",
+    "Article",
+    "Book",
+    "Booklet",
+    "Conference",
+    "Inbook",
+    "Incollection",
+    "Inproceedings",
+    "Manual",
+    "Master's Thesis",
+    "Misc.",
+    "PhD thesis",
+    "Proceedings",
+    "Technical report",
+    "Unpublished,"
+]
+
 class ReferenceType(Enum):
     """
     Enum class to serve as document templates.
@@ -7,6 +30,11 @@ class ReferenceType(Enum):
     `https://www.bibtex.com/e/entry-types/`
 
     TODO: For MISC item type, allow users to add custom fields.
+
+    Current list of document type: 
+    Article, Book, Booklet, Conference, Inbook,
+    Incollection, Inproceedings, Manual, Masters thesis, Misc., PhD thesis,
+    Proceedings, Technical report, Report, Unpublished
     """
     ARTICLE = {
         "key": "",

@@ -15,16 +15,25 @@ class ModelReferenceDatabase:
     regex pattern to substitute with iterated values.
     """
     def __init__(self):
-        self.iteration_start = DEFAULT_START # Replace pattern with iteration_start
-        self.iteration_step = DEFAULT_ITERATIONS # Iterate by iteration_step
-        self.pattern = DEFAULT_PATTERN
+        self.vars_iteration_start_value: int = DEFAULT_START # Replace pattern with iteration_start
+        self.vars_iteration_step_value: int = DEFAULT_ITERATIONS # Iterate by iteration_step
+        self.vars_iterable_string_pattern: str = DEFAULT_PATTERN
         self.references: list[ModelReference] = []
         
         # On init, default to REPORT item type
         self.add_model_reference(ReferenceType.REPORT, len(self.references) + 1)
 
+    def update_iteration_start(self, value: int):
+        self.iteration_start = value
+
+    def update_iteration_step(self, value: int):
+        self.iteration_start = value
+
+    def update_iteration_end(self):
+        self.iteration_end = self.vars_iteration_start_value, self.vars_iteration_step_value
+
     def add_model_reference(self, item_type: ReferenceType, value_iterable: int):
-        self.references.append(ModelReference(item_type, value_iterable, self.pattern))
+        self.references.append(ModelReference(item_type, value_iterable, self.vars_iterable_string_pattern))
 
     def delete_model_reference(self, index: int):
         """
@@ -36,14 +45,24 @@ class ModelReferenceDatabase:
             return
         del self.references[index]
 
-    def update_iteration_start(self, value: int):
-        self.iteration_start = value
+        for i in range(len(self.references)):
+            if self.references[i].value_iterable > 0:
+                self.references[i].value_iterable -= 1
+    
+    def clear_model_reference_fields(self, index: int):
+        """
+            Clears all fields for all iterations  except the first reference,
+            and for fields author that do not have the pattern.
+            This should only happen if the user chooses to go over the previews
+            and modify the fields of an entry after the first.
+            If the first reference has no patterns, then iterations cannot happen.
+        """
+        ...
 
-    def update_iteration_step(self, value: int):
-        self.iteration_start = value
         
     def rebuild_database(self, item_type: ReferenceType, value_iterable: int):
         # rebuilds self.references once button is clicked.
+        # map existing key values to references then append to database
         ...
     def reset_database(self, item_type: ReferenceType, value_iterable: int):
         # reset completely, keeping the first element intact
@@ -57,10 +76,13 @@ class ModelReferenceDatabase:
 
 class ModelReference:
     def __init__(self, item_type: ReferenceType, value_iterable: int, pattern: str):
-        self.item_type = item_type
-        self.value_iterable = value_iterable
-        self.fields = item_type.value
-        self.pattern = pattern
+        self.item_type: ReferenceType = item_type
+        self.value_iterable: int = value_iterable
+        #TODO: Figure out if a model reference should contain the pattern or no
+        self.fields: dict = item_type.value
+        #TODO: is_modified: might be useful when working with internals
+        self.is_modified: bool = False
+        self.pattern: str = pattern
         
     def add_author(self, author_name: str) -> None:
         self.fields["author"].append(author_name)
@@ -72,7 +94,11 @@ class ModelReference:
         self.fields["author"].remove(author_name)
         return
 
-    def update_value_iterable(self, value: str) -> None:
+    def update_value_iterable(self, value: int) -> None:
+        # updates iterable value which is used to replace all strings matching
+        # pattern
+        # Allow user to modify the field. Even if that could desync the value.
+        # Corrects it if steps is modified
         self.value_iterable = value
         return
 
