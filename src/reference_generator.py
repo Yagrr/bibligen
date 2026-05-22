@@ -108,27 +108,40 @@ class ViewRefGenOptions(ttk.Frame):
         self.columnconfigure(3, weight=1)
 
     def setup_view_variables(self):
+        if self.controller is None:
+            raise Exception("Error: controller not set for ViewRefGenOptions")
+
+        # Default to "Report"
+        self.vars_options_doctype_dropdown = ttk.StringVar(value=LIST_REFERENCE_TYPES[0])
+
         #TODO: Figure out what values to keep inside of View, and what to keep in model
         # Probably will need to delete this function if we're storing everything in the model
         # Need to be careful and match these to the model, or make the model match these instead.
-        self.vars_options_start = ttk.StringVar(self)
-        self.vars_options_number_iterations = ttk.StringVar()
+        self.vars_options_start_entry = ttk.StringVar(value=str(DEFAULT_OPTIONS_START))
+        self.vars_options_start_entry.trace_add("write", self.controller.handle_start_value_updated)
+
+        #TODO: To change when step value is updated, or if iteration is deleted
+        # Unsure if this should be placed in ViewRefGenFields
+        self.vars_options_index_reference_in_view = ttk.StringVar(value="1")
+
+        self.vars_options_step_entry = ttk.StringVar(value=str(DEFAULT_OPTIONS_NUMBER_ITERATIONS))
+        self.vars_options_step_entry.trace_add("write", self.controller.handle_step_value_updated)
+
+        self.vars_options_number_iterations_label = ttk.StringVar(value=f"{self.vars_options_index_reference_in_view}/{DEFAULT_OPTIONS_NUMBER_ITERATIONS}")
+        self.vars_options_end_value_label = ttk.StringVar(value=f"{DEFAULT_OPTIONS_START + DEFAULT_OPTIONS_NUMBER_ITERATIONS}")
 
     def gui_setup_frames(self):
         if not self.controller:
             raise Exception("Error: controller not set for ViewRefGenOptions")
         self.ui_options_header_iteration_settings = ttk.Label(self, text="Iteration settings")
-        self.ui_options_doctype_label = ttk.Label(self, text="Document type")
-        self.ui_options_doctype_dropdown = ttk.Combobox(self, values=LIST_REFERENCE_TYPES)
-        self.ui_options_start_label = ttk.Label(self, text="Start")
 
-        #TODO: Add objects and figure out their variables
+        self.ui_options_doctype_label = ttk.Label(self, text="Document type")
+        self.ui_options_doctype_dropdown = ttk.Combobox(self, values=LIST_REFERENCE_TYPES, textvariable=self.vars_options_doctype_dropdown)
+
+        self.ui_options_start_label = ttk.Label(self, text="Start")
         self.ui_options_start_entry = ttk.Entry(self, textvariable=self.vars_options_start_entry)
 
         self.ui_options_step_label = ttk.Label(self, text="N° of iterations") 
-
-        # TODO: Need to figure out how to listen to variable updates.
-        # On update, -> need stringVar() set
         self.ui_options_step_entry = ttk.Spinbox(
             self, 
             from_=DEFAULT_OPTIONS_NUMBER_ITERATIONS, 
@@ -306,18 +319,18 @@ class ControllerReferenceGenerator:
     #self.view.add_callback("get_number_iterations", self.)
         """ Register a ttk.Frame object to mediator """
 
-    def generate_entries(self):
+    def generate_entries(self, variable_name: str, index: str, mode: str) -> None:
         ...
 
-    def handle_doctype_updated(self) -> None:
+    def handle_doctype_updated(self, variable_name: str, index: str, mode: str) -> None:
         ...
 
-    def handle_start_value_updated(self) -> None:
+    def handle_start_value_updated(self, variable_name: str, index: str, mode: str) -> None:
         #TODO: Update ModelReferenceDatabase.iteration_start_value
         # For each ModelReference, update value_iterable
         # GUI: update ViewRefGenOptions.ui_end_value
         ...
-    def handle_step_value_updated(self) -> None:
+    def handle_step_value_updated(self, variable_name: str, index: str, mode: str) -> None:
         # TODO:
         # Update end label value
         # If ViewRefGenFields.index_reference_in_view
@@ -332,14 +345,14 @@ class ControllerReferenceGenerator:
         #
         ...
 
-    def handle_generate_button_clicked(self) -> None:
+    def handle_generate_button_clicked(self, variable_name: str, index: str, mode: str) -> None:
         # TODO: Rename to "generate_bib"?
         # This button is probably poorly named. Should be update references,
         # will have to see how well functions perform if we're constantly updating
         # Actually, generate button should be used if we want to actually output the .bib file
         ...
 
-    def handle_clear_fields_button_clicked(self) -> None:
+    def handle_clear_fields_button_clicked(self, variable_name: str, index: str, mode: str) -> None:
         # TODO: Clears all fields in the reference that's currently in view
         # that does not have the pattern. Except for date and author.
         # TODO: Clear fields button modifies model database, and then view_fields
@@ -350,7 +363,7 @@ class ControllerReferenceGenerator:
         # - Update view_fields entries for the current view.
         ...
 
-    def handle_delete_iteration_button_clicked(self) -> None:
+    def handle_delete_iteration_button_clicked(self, variable_name: str, index: str, mode: str) -> None:
     # Rules:
         # Deactivate button if there is only one reference in list left.
         # TODO:  Need to set as deactivate if there's only one iteration left.
