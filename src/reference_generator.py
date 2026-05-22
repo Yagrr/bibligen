@@ -110,66 +110,67 @@ class ViewRefGenOptions(ttk.Frame):
     def gui_setup_frames(self):
         if not self.controller:
             raise Exception("Error: controller not set for ViewRefGenOptions")
-        self.ui_header_iteration_settings = ttk.Label(self, text="Iteration settings")
-        self.ui_doctype_label = ttk.Label(self, text="Document type")
-        self.ui_doctype_dropdown = ttk.Combobox(self, values=LIST_REFERENCE_TYPES)
-        self.ui_start_label = ttk.Label(self, text="Start")
+        self.ui_options_header_iteration_settings = ttk.Label(self, text="Iteration settings")
+        self.ui_options_doctype_label = ttk.Label(self, text="Document type")
+        self.ui_options_doctype_dropdown = ttk.Combobox(self, values=LIST_REFERENCE_TYPES)
+        self.ui_options_start_label = ttk.Label(self, text="Start")
 
         #TODO: Add objects and figure out their variables
-        self.ui_start_entry = ttk.Entry()
+        self.ui_options_start_entry = ttk.Entry(self, textvariable=self.vars_options_start_entry)
 
-        self.ui_step_label = ttk.Label(self, text="N° of iterations") 
+        self.ui_options_step_label = ttk.Label(self, text="N° of iterations") 
 
         # TODO: Need to figure out how to listen to variable updates.
         # On update, -> need stringVar() set
-        self.ui_step_entry = ttk.Spinbox(
+        self.ui_options_step_entry = ttk.Spinbox(
             self, 
-            from_=1, 
-            to=30, 
-            textvariable=self.vars_options_number_iterations, 
+            from_=DEFAULT_OPTIONS_NUMBER_ITERATIONS, 
+            to=REFGEN_MAX_ITERATIONS, 
+            textvariable=self.vars_options_step_entry, 
             wrap=False,
         )
 
-        self.ui_end_label = ttk.Label(self, text="End")
+        self.ui_options_end_label = ttk.Label(self, text="End")
 
         #TODO: This needs to update when ui_start_entry is modified or ui_step_entry is modified
         # Need to init the value based on default start value
-        self.ui_end_value = ttk.Label(self, text="")
+        self.ui_options_end_value_label = ttk.Label(self, textvariable=self.vars_options_end_value_label)
 
-        self.ui_header_preview_label = ttk.Label(self, text="Preview references", background="grey", anchor="center")
+        self.ui_options_header_preview_label = ttk.Label(self, text="Preview references", background="grey", anchor="center")
 
-        self.ui_generate_button = ttk.Button(self, text="Generate entries", command=self.controller.handle_generate_button_clicked)
-        self.ui_clear_fields_button = ttk.Button(self, text="Clear fields", command=self.controller.handle_clear_fields_button_clicked)
+        self.ui_options_generate_button = ttk.Button(self, text="Generate entries", command=self.controller.handle_generate_button_clicked)
+        self.ui_options_clear_fields_button = ttk.Button(self, text="Clear fields", command=self.controller.handle_clear_fields_button_clicked)
 
-        self.ui_delete_iteration_button = ttk.Button(self, text="Delete iteration", command=self.controller.handle_delete_iteration_button_clicked)
+        self.ui_options_delete_iteration_button = ttk.Button(self, text="Delete iteration", command=self.controller.handle_delete_iteration_button_clicked)
 
         # TODO: This needs to update when either 
-        # ui_start_entry is modified or
+        # current reference in view index is modified or
         # ui_step_entry is modified.
         # To create function Update step/start
-        self.ui_number_iterations_label = ttk.Label(self, text="")
+        # Example display: 1/6 iterations
+        self.ui_options_number_iterations_label = ttk.Label(self, textvariable=self.vars_options_number_iterations_label)
 
-        self.ui_previous_iteration_button = ttk.Button(self, text="Previous", command=self.controller.handle_previous_button_clicked)
-        self.ui_next_iteration_button = ttk.Button(self, text="Next", command=self.controller.handle_next_button_clicked)
+        self.ui_options_previous_iteration_button = ttk.Button(self, text="Previous", command=self.controller.handle_previous_button_clicked)
+        self.ui_options_next_iteration_button = ttk.Button(self, text="Next", command=self.controller.handle_next_button_clicked)
 
         # Place objects in RefGenOptions frame
-        self.ui_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=2)
-        self.ui_doctype_label.grid(column=0, row=1, sticky="nsew")
-        self.ui_doctype_dropdown.grid(column=1, row=1, sticky="nsew")
-        self.ui_start_label.grid(column=0, row=2, sticky="nsew")
-        self.ui_start_entry.grid(column=1, row=2, sticky="nsew")
-        self.ui_step_label.grid(column=0, row=3, sticky="nsew")
-        self.ui_step_entry.grid(column=1, row=3, sticky="nsew")
-        self.ui_end_label.grid(column=0, row=4, sticky="nsew")
-        self.ui_end_value.grid(column=1, row=4, sticky="nsew")
+        self.ui_options_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=2)
+        self.ui_options_doctype_label.grid(column=0, row=1, sticky="nsew")
+        self.ui_options_doctype_dropdown.grid(column=1, row=1, sticky="nsew")
+        self.ui_options_start_label.grid(column=0, row=2, sticky="nsew")
+        self.ui_options_start_entry.grid(column=1, row=2, sticky="nsew")
+        self.ui_options_step_label.grid(column=0, row=3, sticky="nsew")
+        self.ui_options_step_entry.grid(column=1, row=3, sticky="nsew")
+        self.ui_options_end_label.grid(column=0, row=4, sticky="nsew")
+        self.ui_options_end_value_label.grid(column=1, row=4, sticky="nsew")
 
-        self.ui_header_preview_label.grid(column=2, row=0, sticky="nsew", columnspan=2)
-        self.ui_generate_button.grid(column=2, row=1, sticky="nsew", columnspan=2)
-        self.ui_clear_fields_button.grid(column=2, row=2, sticky="nsew")
-        self.ui_delete_iteration_button.grid(column=3, row=2, sticky="nsew")
-        self.ui_number_iterations_label.grid(column=2, row=3, sticky="nsew", columnspan=2)
-        self.ui_previous_iteration_button.grid(column=2, row=4, sticky="nsew")
-        self.ui_next_iteration_button.grid(column=3, row=4, sticky="nsew")
+        self.ui_options_header_preview_label.grid(column=2, row=0, sticky="nsew", columnspan=2)
+        self.ui_options_generate_button.grid(column=2, row=1, sticky="nsew", columnspan=2)
+        self.ui_options_clear_fields_button.grid(column=2, row=2, sticky="nsew")
+        self.ui_options_delete_iteration_button.grid(column=3, row=2, sticky="nsew")
+        self.ui_options_number_iterations_label.grid(column=2, row=3, sticky="nsew", columnspan=2)
+        self.ui_options_previous_iteration_button.grid(column=2, row=4, sticky="nsew")
+        self.ui_options_next_iteration_button.grid(column=3, row=4, sticky="nsew")
 
     def _gui_show_layout(self):
         """
