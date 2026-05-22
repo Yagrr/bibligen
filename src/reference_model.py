@@ -1,8 +1,8 @@
 import re
 
 from .settings import (
-    DEFAULT_START,
-    DEFAULT_ITERATIONS,
+    DEFAULT_OPTIONS_START,
+    DEFAULT_OPTIONS_NUMBER_ITERATIONS,
     DEFAULT_PATTERN,
 )
 
@@ -15,8 +15,8 @@ class ModelReferenceDatabase:
     regex pattern to substitute with iterated values.
     """
     def __init__(self):
-        self.vars_iteration_start_value: int = DEFAULT_START # Replace pattern with iteration_start
-        self.vars_iteration_step_value: int = DEFAULT_ITERATIONS # Iterate by iteration_step
+        self.vars_iteration_start_value: int = DEFAULT_OPTIONS_START # Replace pattern with iteration_start
+        self.vars_iteration_step_value: int = DEFAULT_OPTIONS_NUMBER_ITERATIONS # Iterate by iteration_step
         self.vars_iterable_string_pattern: str = DEFAULT_PATTERN
         self.references: list[ModelReference] = []
         
@@ -80,7 +80,7 @@ class ModelReference:
         self.value_iterable: int = value_iterable
         #TODO: Figure out if a model reference should contain the pattern or no
         self.fields: dict = item_type.value
-        #TODO: is_modified: might be useful when working with internals
+        #TODO: is_modified: might be useful
         self.is_modified: bool = False
         self.pattern: str = pattern
         
