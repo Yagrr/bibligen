@@ -4,7 +4,7 @@ from enum import Enum
 List of currently supported reference types, for use by GUI
 vars_options_doctype_dropdown 
 """
-list_reference_types = [
+LIST_REFERENCE_TYPES = [
     "Report",
     "Misc.",
     "Article",

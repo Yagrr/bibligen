@@ -8,8 +8,8 @@ THEME = "darkly"
 FONT = "TkFixedFont"
 FONT_SIZE = 14
 
-DEFAULT_START = 0
-DEFAULT_ITERATIONS = 1
+DEFAULT_OPTIONS_START = 0
+DEFAULT_OPTIONS_NUMBER_ITERATIONS = 1
 # Double square brackets, only capturing digit inside
 DEFAULT_PATTERN = r"(?:\[\[)\d+(?:\]\])"
 

@@ -1,10 +1,17 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 
-from .settings import REFGEN_MAX_FIELDS, FONT, FONT_SIZE
+from .settings import (
+    FONT,
+    FONT_SIZE,
+    DEFAULT_OPTIONS_START,
+    DEFAULT_OPTIONS_NUMBER_ITERATIONS,
+    REFGEN_MAX_ITERATIONS,
+    REFGEN_MAX_FIELDS,
+)
 from .utils import ScrollBar
 from .reference_model import ModelReferenceDatabase
-from .reference_type import list_reference_types
+from .reference_type import LIST_REFERENCE_TYPES
 
 
 class WrapperRefGen(ttk.Frame):
