@@ -1,3 +1,4 @@
+import copy
 import tkinter as tk
 import ttkbootstrap as ttk
 
@@ -18,6 +19,21 @@ class WrapperRefGen(ttk.Frame):
     """
     Parent GUI Frame container to contain "reference generator options" container
     and the "reference fields" container.
+    UI object hierarchy:
+    Wrapper RefGen -> ContainerRefGen (grid)
+                            -> WrapperRefGenOptions
+                                    ->ViewRefGenOptions (grid, connected to controller)
+                                        ->Widgets and user interactions
+                            -> ContainerRefGenFields
+                                    ->WrapperRefGenFields (pack)
+                                            -> .ui_fields_canvasCanvas
+                                                ->ViewRefGenFields (pack, connected to controller)
+                                                        ->ViewReferenceField
+                                                            ->Widgets and user interactions                                                   
+                                                        ->ViewReferenceField
+                                                            ->Widgets and user interactions                                                   
+                                                        ...
+
     """
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
@@ -51,23 +67,25 @@ class ContainerRefGen(ttk.Frame):
 
     def gui_create_frames(self):
         self.wrapper_refgen_options = WrapperRefGenOptions(self)
-        self.wrapper_refgen_fields = WrapperRefGenFields(self)
+        self.wrapper_refgen_fields = ContainerRefGenFields(self)
 
         self.wrapper_refgen_options.grid(column=0, row=0, sticky="nsew")
         self.wrapper_refgen_fields.grid(column=0, row=1, sticky="nsew")
 
     def initialise_mvc(self):
         """
-            Creating model and linking model and views to controller
+            Creating model and linking model and views to controller.
+            Controller links to ViewRefGenOptions and ViewRefgenFields.
+            ViewRefgenFields is nested in frames for UI purposes.
         """
         self.refgen_model = ModelReferenceDatabase()
         self.controller_refgen = ControllerReferenceGenerator(
             self.refgen_model, 
             self.wrapper_refgen_options.view_frame, 
-            self.wrapper_refgen_fields.view_frame,
+            self.wrapper_refgen_fields.view_frame.view_refgen_fields,
         )
         self.wrapper_refgen_options.view_frame.controller = self.controller_refgen
-        self.wrapper_refgen_options.view_frame.controller = self.controller_refgen
+        self.wrapper_refgen_fields.view_frame.view_refgen_fields.controller = self.controller_refgen
 
 class WrapperRefGenOptions(ttk.Frame):
     """
@@ -92,6 +110,7 @@ class ViewRefGenOptions(ttk.Frame):
         self.controller: ControllerReferenceGenerator | None = None
         self.gui_setup_grid_layout()
         self._gui_show_layout()
+        #self.setup_view_variables()
         #self.gui_setup_frames()
 
  
@@ -166,7 +185,7 @@ class ViewRefGenOptions(ttk.Frame):
 
         # TODO: This needs to update when either 
         # current reference in view index is modified or
-        # ui_step_entry is modified.
+        # ui_step_entry is modified. Or when iteration is deleted
         # To create function Update step/start
         # Example display: 1/6 iterations
         self.ui_options_number_iterations_label = ttk.Label(self, textvariable=self.vars_options_number_iterations_label)
@@ -234,75 +253,166 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_layout_previous_iteration_button.grid(column=2, row=4, sticky="nsew")
         self.ui_layout_next_iteration_button.grid(column=3, row=4, sticky="nsew")
 
-    def gui_reset(self):
-        ...
 
-class WrapperRefGenFields(ttk.Frame):
+class ContainerRefGenFields(ttk.Frame):
     """
-        Wrapper for RefGenFields for placement in parent frame, and to avoid
+        Container for RefGenFields for placement in parent frame, and to avoid
         pack() / grid() conflicts.
     """
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
-        self.view_frame = ViewRefGenFields(self)
+        self.view_frame = WrapperRefGenFields(self)
         self.view_frame.pack(expand=True, fill=tk.BOTH)
 
 
-class ViewRefGenFields(ttk.Frame):
+class WrapperRefGenFields(ttk.Frame):
+    """
+        Wrapper for RefGenFields for creating a scrollable canvas.
+    """
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
-        self.entries = []
-    # TODO: Used to keep track of which Reference in the canvas is displayed
+
+    # TODO: index_reference_in_view is used to keep track of which Reference in
+    # the canvas/table is displayed
     # To implement getter and setter functions to expose to controller
     # Getter function will be used for ui_number_iterations_label in Options
-        self.index_reference_in_view = 0
         self.parent = container
         self.controller: ControllerReferenceGenerator | None = None
         self.ui_fields_canvas = ttk.Canvas(self)
         self.ui_fields_canvas_scrollbar = ScrollBar(self, self.ui_fields_canvas)
+        self.view_refgen_fields = ViewRefGenFields(self.ui_fields_canvas)
 
-        #self._gui_show_layout()
-        self.gui_add_fields()
+        self.gui_setup_canvas_layout()
 
-        #TODO: Need to figure out how to add widgets to Canvas (entry and button)
-        # Need to create a [field_name] [entry] object
+    def gui_setup_canvas_layout(self):
+        self.ui_fields_canvas.create_window((100,1000), window=self.view_refgen_fields, anchor="center")
 
-        # TODO: Setup grid for ui_canvas. Maybe place +field at the bottom of canvas
-        # TODO: Create a separate frame object of fixed width for UI fields canvas.
-        # The canvas is purely here to enable scrolling.
-        # Arbitrary width but of fixed height. Used to place fields.
     def _gui_show_layout(self):
         self.ui_fields = ttk.Label(self, text="Fields", background="blue", anchor="center")
         #self.ui_fields.grid(column=0, row=0, sticky="nsew", columnspan=4, rowspan=4)
         self.ui_fields.pack(expand=True, fill=tk.BOTH)
 
-    def gui_add_fields(self):
-        """ 
-        TODO: Create a ViewReference object that will be placed in ViewRefGenFields canvas
-        The ViewRef object should contain its own way of adding/deleting view fields
-
-        ViewRefGenFields -parent of-> ViewReference
-        ModelReferenceDatabase -parent of-> ModelReference
-        """
         self.test = ttk.Label(self.ui_fields_canvas, text="Hello!", background="blue", anchor="center")
         self.test.pack(expand=True, fill=tk.BOTH)
+        self.ui_fields_canvas.create_window((100, 1000), window=self.test, anchor="center")
         self.test2 = ttk.Label(self.ui_fields_canvas, text="Goodbye!", background="blue", anchor="center")
         self.test2.pack(expand=True, fill=tk.BOTH)
         self.ui_fields_canvas.create_window((100, 1000), window=self.test, anchor="center")
         self.ui_fields_canvas.create_window((100, 500), window=self.test2, anchor="center")
  
-    #TODO:Add entry creation and deletion function.
-    # This should keep track of how many references there are
-    def gui_add_entry(self):
-        # Check if over REFGEN_MAX_FIELDS
-        # Trigger popup if that happens
-        self.ref_count += 1
 
-    def gui_delete_entry(self):
-        # Check if over REFGEN_MAX_FIELDS
-        self.ref_count -= 1
+class ViewRefGenFields(ttk.Frame):
+    """
+        Represents the fields for a given Reference entry in
+        ModelReferenceDatabase. Wrapper for ViewReferenceField, to be placed in
+        canvas for scrolling. ViewRefGenFields objects are contained within
 
+        TODO: Implement auto resize for adding custom fields. Need to implement regular fields first.
+        #TODO: Feature: ability to add custom fields up to REFGEN_MAX_FIELDS
+    """
+    def __init__(self, container=None, **kw):
+        
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent = container
+        self.index_reference_in_view: int = 0
+        self.controller: ControllerReferenceGenerator | None = None
+        self.fields: list[ViewReferenceField] = []
+
+
+    def get_index_reference_in_view(self) -> int:
+        return self.index_reference_in_view
+
+    def create_reference_fields(self, model_fields_dict: dict):
+        # TODO: Implement a for loop that goes through each key:values
+        # that are not Author, Report or Year
+        # Add conditions for Author and Editors field
+        # Create a new ViewReferenceField() passing field_name and field_value.
+        # TODO: Create initialise model function in model
+        ...
+
+    def delete_reference_fields(self):
+        ...
+
+    def gui_generate_reference_in_view(self, model_fields_dict: dict):
+        """
+            Generates ViewReferenceField UI objects inside of ViewRefGenFields
+            canvas to be displayed.
+
+            Input: 
+            model_fields_dict corresponds to an input dictionary of
+            dict[field_name: field_value] pairs. Special fields corresponding
+            to a list like Author and Editor logic are to be handled by ViewReferenceField logic.
+        """
+        for field_name, field_value in model_fields_dict.items():
+            self.fields.append(ViewReferenceField(self, field_name, field_value))
+
+        # TODO: Test if scrollable area needs to be updated since the number of fields would change.
+        
+    def gui_delete_reference_in_view(self):
+        """
+            Destroys all children within the ViewRefGenFields frame.
+            This assumes that all of the frame's children are ViewReferenceField.
+            TODO: Check if this affects the scrollable area and check if it
+            needs to be resized
+        """
+        for field in self.winfo_children():
+            field.destroy()
+
+
+class ViewReferenceField(ttk.Frame):
+    """
+        Generic class object representing the label and entry field of a given reference in view.
+        Automatically adds callback function for the fields that are being updated.
+        Fields for dates and lists of authors/editors should be handled differently.
+
+        Inputs: 
+
+        ViewRefGenFields: container with a linked controller as an input
+        field_name: String for creating label
+        field_value (optional): String for populating entry field.
+
+
+        TODO: Add conditions for creating [Authors] widget, conditions for date entry widget.
+        Figure out drag/drop mechanics for reordering author.
+    """
+    def __init__(self, container: ViewRefGenFields, field_name: str, field_value: str="", **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent: ViewRefGenFields = container
+
+        self.gui_setup_grid_layout()
+        self.setup_view_variables(field_value)
+        self.gui_create_widgets(field_name)
+
+
+        self.pack(side=tk.TOP, fill=tk.X)
+
+    def get_field_value(self) -> str:
+        return self.vars_field_value.get()
+    
+    def gui_setup_grid_layout(self):
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=3)
+
+    def setup_view_variables(self, field_value):
+        if self.parent is None:
+            raise Exception(f"Error - unable to setup view variables: Inaccessible controller - no parent set for ViewReferenceField '{self}'")
+        if self.parent.controller is None:
+            raise Exception(f"Error - unable to setup view variables: Inaccessible controller - no controller set for '{self.parent}'")
+
+        self.vars_field_value = ttk.StringVar(self, value=field_value)
+        self.vars_field_value.trace_add("write", self.parent.controller.handle_field_value_updated)
+
+        return
+
+    def gui_create_widgets(self, field_name: str):
+        self.label_field_name = ttk.Label(self, text=f"{field_name.capitalize()}")
+        self.label_field_name.grid(column=0, row=0, sticky="nsew", padx=(25, 10))
+        self.field_entry = ttk.Entry(self, textvariable=self.vars_field_value)
+        self.field_entry.grid(column=1, row=0, sticky="nsew", padx=(25, 10))
+
+        return
 
 class ControllerReferenceGenerator:
     """
@@ -317,46 +427,94 @@ class ControllerReferenceGenerator:
     # Allows user interactions to bind to internal data as per MVC framework.
     # 1. Not sure if models and views should be implemented as dictionary
     # 2. Not sure if this should be placed in app.py as this will communicate between widgets
-    #self.view.add_callback("get_number_iterations", self.)
-        """ Register a ttk.Frame object to mediator """
-
-    def generate_entries(self, variable_name: str, index: str, mode: str) -> None:
-        ...
 
     def handle_doctype_updated(self, variable_name: str, index: str, mode: str) -> None:
-        ...
+        """
+            Called when ViewRefGenOptions.vars_options_doctype_dropdown is updated.
+            Updates all fields in ReferenceModel in ModelReferenceDatabase to
+            have the same dictionary signature as the new doctype, with the
+            updated item_type. Effectively keeps all fields in the existing
+            references that are in common with the new doctype. Updates the
+            Reference in view to the updated document type.
+            
+            If field name does not exist in the refernce, then create it in the
+            ReferenceModel.fields dictionary.
+            If it does not exist, then add the field. Handles fields that
+            corresponds to a list.
 
+            Regenerates ViewRefGenFields to display the new fields, as
+            per ViewRefGenFields.index_reference_in_view
+        """
+        doctype: str = self.view_options.vars_options_doctype_dropdown.get()
+
+        new_doctype_fields_template: dict = DROPDOWN_REFERENCE_TYPES[doctype].value
+        # Get all field names except for "item_type" in the new document template.
+        new_doctype_fields_list: list[str] = [field_name for field_name in new_doctype_fields_template.keys() if field_name != "item_type"]
+
+        for reference in self.model.references:
+            reference_fields = list(reference.fields.keys())
+
+            for field_name in reference_fields:
+                if field_name != "item_type" and field_name not in new_doctype_fields_list:
+                    del reference.fields[field_name]
+
+            for field_name, field_value in new_doctype_fields_template.items():
+                if field_name not in reference.fields:
+                    # Create field if it does not exist, detect if field is a list or a string
+                    if isinstance(field_value, list):
+                        reference.fields[field_name] = []
+                    else:
+                        reference.fields[field_name] = field_value
+
+        # Call ViewReferenceTable to display the new model.
+        index_reference_in_view: int = self.view_fields.get_index_reference_in_view()
+        dictionary_in_view: dict = self.model.references[index_reference_in_view].fields
+        self.view_fields.gui_delete_reference_in_view()
+        self.view_fields.gui_generate_reference_in_view(dictionary_in_view)
+        return
+        
+        
     def handle_start_value_updated(self, variable_name: str, index: str, mode: str) -> None:
         #TODO: Update ModelReferenceDatabase.iteration_start_value
-        # For each ModelReference, update value_iterable
+        # For each ModelReference in ModelReferenceDatabase, update value_iterable.
         # GUI: update ViewRefGenOptions.ui_end_value
+        #  In ViewRefGenFields: Reinitialise by calling delete_reference_fields
+        #  then create_reference_fields because vars_ in ModelReferenceDatabase has been updated
         ...
+
     def handle_step_value_updated(self, variable_name: str, index: str, mode: str) -> None:
         # TODO:
         # Update end label value
-        # If ViewRefGenFields.index_reference_in_view
-        # is less than the new step count, then decrement it
-            # Then delete reference view object in ViewRefGenFields
-            # Then delete reference model entry in Reference_Database list
+        # If new step value is less than previous:
+            # in ModelReferenceDatabase: delete all entries that exceed the new
+            # step value ModelReferenceDatabase.references[:step]
+            # If ViewRefGenFields.index_reference_in_view
+                # is less than the new step count, then decrement reference_in_view, 
+                #  in ViewRefGenFields
+                    # call delete_reference_fields call create_reference_fields for
+                    # the new last entry,  in
+                    # ModelReferenceDatabase[index_reference_in_view].
+            # Else: Leave index_reference_in_view as-is.
+        # If new step value is more than previous:
+            # Triggers model.add_model_reference, map new reference_model
+            # fields to the last reference_model fields
         # Update vars_iteration_step_value in ModelReferenceDatabase
         # Rebuild database:
-            # For all ReferenceModel in ModelReferenceDatabase:
-            # 
-            
-        #
+        # For all ReferenceModel in ModelReferenceDatabase:
+        # 
         ...
 
     def handle_generate_button_clicked(self, variable_name: str, index: str, mode: str) -> None:
         # TODO: Rename to "generate_bib"?
-        # This button is probably poorly named. Should be update references,
-        # will have to see how well functions perform if we're constantly updating
-        # Actually, generate button should be used if we want to actually output the .bib file
+        # Send ModelReferenceDatabase references to output window where user
+        # can copy output or save to file
         ...
 
     def handle_clear_fields_button_clicked(self, variable_name: str, index: str, mode: str) -> None:
-        # TODO: Clears all fields in the reference that's currently in view
-        # that does not have the pattern. Except for date and author.
-        # TODO: Clear fields button modifies model database, and then view_fields
+        # TODO: 
+        # For current reference in view, update ModelReference where all fields except
+        # author and date are equal to empty string
+        # Clear fields button modifies model database, and then view_fields
         # Any fields that do not have the pattern are cleared and values replaced with an empty string
         # Implement controller.clear_fields function
         # Interactions:
@@ -407,37 +565,11 @@ class ControllerReferenceGenerator:
         # This should also handle the case where there is only one reference.
         ...
 
-    def handle_field_value_updated(self, field_name: str) -> None:
+    def handle_field_value_updated(self, variable_name: str, index: str, mode: str) -> None:
+        # Get field_name
         # Triggered when value is updated and clicked off
         # Updates ReferenceModel from UI interaction
         # Need to pass which reference is in view so the model
         # knows which reference to update
         # Triggers 
         ...
-
-    # Functions below are to be removed, they're just placeholders.
-    # Better suited if they were in the View/Model
-        # def fetch_model_iteration_start_value(self) -> int:
-        #     return self.model.vars_iteration_start_value
-
-        # def update_model_iteration_start_value(self, value: int):
-        #     self.model.vars_iteration_start_value = value
-
-        # def fetch_model_iteration_step_value(self) -> int:
-        #     # THis should update the view
-        #     return self.model.vars_iteration_step_value
-
-        # def update_model_iteration_step_value(self, value: int):
-        #     self.model.vars_iteration_step_value = value
-
-
-        # def update_view(self, view, model):
-        #     ...
-
-        # def update_options_iterations_start(self):
-        #     ...
-
-        # def update_option_iteration_number(self):
-        # If reference in database is less than iteration number, then delete.
-        ...
-    # def update_field(self):
