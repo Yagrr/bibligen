@@ -4,24 +4,6 @@ from enum import Enum
 List of currently supported reference types, for use by GUI
 vars_options_doctype_dropdown 
 """
-LIST_REFERENCE_TYPES = [
-    "Report",
-    "Misc.",
-    "Article",
-    "Book",
-    "Booklet",
-    "Conference",
-    "Inbook",
-    "Incollection",
-    "Inproceedings",
-    "Manual",
-    "Master's Thesis",
-    "Misc.",
-    "PhD thesis",
-    "Proceedings",
-    "Technical report",
-    "Unpublished,"
-]
 
 class ReferenceType(Enum):
     """
@@ -296,3 +278,21 @@ class ReferenceType(Enum):
 
         "url": ""
     }
+
+DROPDOWN_REFERENCE_TYPES: dict[str, ReferenceType] = {
+    "Report": ReferenceType.REPORT,
+    "Misc.": ReferenceType.MISC,
+    "Article": ReferenceType.ARTICLE,
+    "Book": ReferenceType.BOOK,
+    "Booklet": ReferenceType.BOOKLET,
+    "Conference": ReferenceType.CONFERENCE,
+    "Inbook": ReferenceType.INBOOK,
+    "Incollection": ReferenceType.INCOLLECTION,
+    "Inproceedings": ReferenceType.INPROCEEDINGS,
+    "Manual": ReferenceType.MANUAL,
+    "Master's Thesis": ReferenceType.MASTERSTHESIS,
+    "PhD thesis": ReferenceType.PHDTHESIS,
+    "Proceedings": ReferenceType.PROCEEDINGS,
+    "Technical report": ReferenceType.TECHREPORT,
+    "Unpublished": ReferenceType.UNPUBLISHED,
+}
