@@ -10,9 +10,11 @@ from .settings import (
     REFGEN_MAX_ITERATIONS,
     REFGEN_MAX_FIELDS,
 )
-from .utils import ScrollBar, _debug_log_fn_decorator
+from .utils import (
+    ScrollBar,
+    _debug_log_fn_decorator,
+)
 from .reference_model import ModelReferenceDatabase
-from .reference_type import DROPDOWN_REFERENCE_TYPES
 
 
 class WrapperRefGen(ttk.Frame):
@@ -404,62 +406,52 @@ class ViewReferenceField(ttk.Frame):
 
 class ControllerReferenceGenerator:
     """
-    Element linking model component to the UI state and user interactions.
-    If X button is clicked, then Y happens to internal data.
+    Controller object linking user interactions to the view component (GUI),
+    and model component (internal data).
+    
+    Ex: If X button is clicked, then Y happens to internal data, and Z GUI
+    element is updated.
     """
     def __init__(self, model: ModelReferenceDatabase, view_options: ViewRefGenOptions, view_fields: ViewRefGenFields):
         self.model = model
         self.view_options = view_options
         self.view_fields = view_fields
-    # TODO: Create custom logic to setup interactions between model and view
-    # Allows user interactions to bind to internal data as per MVC framework.
-    # 1. Not sure if models and views should be implemented as dictionary
-    # 2. Not sure if this should be placed in app.py as this will communicate between widgets
 
     @_debug_log_fn_decorator
-    def handle_doctype_updated(self, variable_name: str, index: str, mode: str) -> None:
-        """
-            Called when ViewRefGenOptions.vars_options_doctype_dropdown is updated.
-            Updates all fields in ReferenceModel in ModelReferenceDatabase to
-            have the same dictionary signature as the new doctype, with the
-            updated item_type. Effectively keeps all fields in the existing
-            references that are in common with the new doctype. Updates the
-            Reference in view to the updated document type.
-            
-            If field name does not exist in the refernce, then create it in the
-            ReferenceModel.fields dictionary.
-            If it does not exist, then add the field. Handles fields that
-            corresponds to a list.
-
-            Regenerates ViewRefGenFields to display the new fields, as
-            per ViewRefGenFields.index_reference_in_view
-        """
-        doctype: str = self.view_options.vars_options_doctype_dropdown.get()
-
-        new_doctype_fields_template: dict = DROPDOWN_REFERENCE_TYPES[doctype].value
-        # Get all field names except for "item_type" in the new document template.
-        new_doctype_fields_list: list[str] = [field_name for field_name in new_doctype_fields_template.keys() if field_name != "item_type"]
-
-        for reference in self.model.references:
-            reference_fields = list(reference.fields.keys())
-
-            for field_name in reference_fields:
-                if field_name != "item_type" and field_name not in new_doctype_fields_list:
-                    del reference.fields[field_name]
-
-            for field_name, field_value in new_doctype_fields_template.items():
-                if field_name not in reference.fields:
-                    # Create field if it does not exist, detect if field is a list or a string
-                    if isinstance(field_value, list):
-                        reference.fields[field_name] = []
-                    else:
-                        reference.fields[field_name] = field_value
-
+    def refresh_view_fields_reference_in_view(self):
         # Call ViewReferenceTable to display the new model.
         index_reference_in_view: int = self.view_fields.get_index_reference_in_view()
         dictionary_in_view: dict = self.model.references[index_reference_in_view].fields
         self.view_fields.gui_delete_reference_in_view()
         self.view_fields.gui_generate_reference_in_view(dictionary_in_view)
+
+    @_debug_log_fn_decorator
+    def handle_doctype_updated(self, variable_name: str, index: str, mode: str) -> None:
+        """
+        Called when ViewRefGenOptions.vars_options_doctype_dropdown is
+        updated following user interaction with
+        ViewRefGenOptions.ui_options_doctype_dropdown.
+
+        Behaviour:
+        Modifies the "item_type" field in all ModelReference using
+        ModelReferenceDatabase.update_reference_doctype()
+            - For each ModelReferenceDatabase.references of type ModelReference
+                - ModelReference.fields to match the dictionary signature of
+                    the new document type as defined in DROPDOWN_REFERENCE_TYPES
+                    which links the UI dropdown reference type to the
+                    ReferenceType enum, containing the field signature of a given
+                    `item_type`/ReferenceType/document type.
+            - Rebuilds the reference in view in RefGenFields to reflect the new
+                internal changes.
+
+        Logic:
+            - If field name does not exist in the reference, then create it with
+            an empty field value in the ModelReference.fields dictionary.
+            - If the field name does exist, then leave it as-is.
+        """
+        doctype: str = self.view_options.vars_options_doctype_dropdown.get()
+        self.model.update_reference_doctype(doctype)
+        self.refresh_view_fields_reference_in_view()
         return
         
     @_debug_log_fn_decorator

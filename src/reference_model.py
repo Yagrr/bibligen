@@ -6,7 +6,7 @@ from .settings import (
     DEFAULT_PATTERN,
 )
 
-from .reference_type import ReferenceType
+from .reference_type import ReferenceType, DROPDOWN_REFERENCE_TYPES
 from .utils import _debug_log_fn_decorator
 
 class ModelReferenceDatabase:
@@ -24,6 +24,33 @@ class ModelReferenceDatabase:
         # On init, default to REPORT item type
         self.add_model_reference(ReferenceType.REPORT, len(self.references) + 1)
 
+    def get_reference_fields(self, index: int):
+        """
+        Returns the reference fields at a given index.
+        """
+        return self.references[index].fields
+
+
+    def update_reference_doctype(self, doctype: str):
+        new_doctype_fields_template: dict = DROPDOWN_REFERENCE_TYPES[doctype].value
+        # Get all field names except for "item_type" in the new document template.
+        new_doctype_fields_list: list[str] = [field_name for field_name in new_doctype_fields_template.keys() if field_name != "item_type"]
+
+        for reference in self.references:
+            reference_fields = list(reference.fields.keys())
+
+            for field_name in reference_fields:
+                if field_name != "item_type" and field_name not in new_doctype_fields_list:
+                    del reference.fields[field_name]
+
+            for field_name, field_value in new_doctype_fields_template.items():
+                if field_name not in reference.fields:
+                    # Create field if it does not exist, detect if field is a list or a string
+                    if isinstance(field_value, list):
+                        reference.fields[field_name] = []
+                    else:
+                        reference.fields[field_name] = field_value
+        return
     def update_iteration_start(self, value: int):
         self.iteration_start = value
 
