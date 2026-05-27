@@ -19,7 +19,6 @@ class ReferenceType(Enum):
     Proceedings, Technical report, Report, Unpublished
     """
     ARTICLE = {
-        "key": "",
         "item_type": "@article",
         "author": [],
         "title": "",
@@ -36,7 +35,6 @@ class ReferenceType(Enum):
         "note": "",
     }
     BOOK = {
-        "key": "",
         "item_type": "@book",
         "author": [],
         "title": "",
@@ -57,7 +55,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     BOOKLET = {
-        "key": "",
         "item_type": "@book",
         "author": [],
         "title": "",
@@ -76,7 +73,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     CONFERENCE = {
-        "key": "",
         "item_type": "@conference",
         "author": [],
         "title": "",
@@ -97,7 +93,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     INBOOK = {
-        "key": "",
         "item_type": "@inbook",
         "author": [],
         "title": "",
@@ -118,7 +113,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     INCOLLECTION = {
-        "key": "",
         "item_type": "@incollection",
         "author": [],
         "title": "",
@@ -139,7 +133,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     INPROCEEDINGS = {
-        "key": "",
         "item_type": "@inproceedings",
         "author": [],
         "title": "",
@@ -159,7 +152,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     MANUAL = {
-        "key": "",
         "item_type": "@manual",
         "author": [],
         "title": "",
@@ -177,7 +169,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     MASTERSTHESIS = {
-        "key": "",
         "item_type": "@mastersthesis",
         "author": [],
         "title": "",
@@ -193,7 +184,6 @@ class ReferenceType(Enum):
     }
     """ ALLOW USERS TO ADD CUSTOM FIELDS FOR MISC TYPE """
     MISC = {
-        "key": "",
         "item_type": "@misc",
         "author": [],
         "title": "",
@@ -203,7 +193,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     PHDTHESIS = {
-        "key": "",
         "item_type": "@mastersthesis",
         "author": [],
         "title": "",
@@ -218,7 +207,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     PROCEEDINGS = {
-        "key": "",
         "item_type": "@proceedings",
         "editor": [],
         "title": "",
@@ -236,7 +224,6 @@ class ReferenceType(Enum):
         "url": "",
     }
     TECHREPORT = {
-        "key": "",
         "item_type": "@techreport",
         "author": [],
         "title": "",
@@ -253,7 +240,6 @@ class ReferenceType(Enum):
     # REPORT is non standard but included anyways because app use-case mainly applies
     # to this document type
     REPORT = {
-        "key": "",
         "item_type": "@report",
         "author": [],
         "title": "",
@@ -268,7 +254,6 @@ class ReferenceType(Enum):
         "url": ""
     }
     UNPUBLISHED = {
-        "key": "",
         "item_type": "@unpublished",
         "author": [],
         "title": "",

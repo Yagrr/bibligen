@@ -9,6 +9,7 @@ from src.settings import (
 )
 
 from src.reference_generator import WrapperRefGen
+from src.output_display import WrapperOutputWindow
 
 
 class App(ttk.Window):
@@ -31,20 +32,22 @@ class UserInterface(ttk.Frame):
 
         self.gui_setup_grid_layout()
         self.gui_create_frames()
-        self._gui_show_layout()
+        #self._gui_show_layout()
 
     def gui_setup_grid_layout(self):
         # 3x2 grid layout
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=3)
+        self.columnconfigure(0, weight=2)
+        self.columnconfigure(1, weight=1)
 
     def gui_create_frames(self):
         # Invoke containers to initialise app
-        self.frame_left = WrapperRefGen(self, padding="15") 
-        self.frame_left.grid(column=0, row=0, sticky="nsew", rowspan=3)
+        self.frame_left = WrapperRefGen(self) 
+        self.frame_left.grid(column=0, row=0, sticky="nsew", rowspan=3, pady=10)
+        self.frame_right = WrapperOutputWindow(self)
+        self.frame_right.grid(column=1, row=0, sticky="nsew", rowspan=3, padx=(0, 10), pady=10)
 
     def _gui_show_layout(self):
         # Visualising widget placement for testing
