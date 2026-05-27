@@ -136,21 +136,18 @@ class ViewRefGenOptions(ttk.Frame):
         self.vars_options_doctype_dropdown = ttk.StringVar(self, value=list(DROPDOWN_REFERENCE_TYPES.keys())[0])
         self.vars_options_doctype_dropdown.trace_add("write", self.controller.handle_doctype_updated)
 
-        #TODO: Figure out what values to keep inside of View, and what to keep in model
-        # Probably will need to delete this function if we're storing everything in the model
-        # Need to be careful and match these to the model, or make the model match these instead.
-        self.vars_options_iteration_start_entry = ttk.StringVar(self, value=str(DEFAULT_OPTIONS_START))
+        self.vars_options_iteration_start_entry = ttk.IntVar(self, value=DEFAULT_OPTIONS_START)
         self.vars_options_iteration_start_entry.trace_add("write", self.controller.handle_start_value_updated)
 
         #TODO: To change when step value is updated, or if iteration is deleted
         # Unsure if this should be placed in ViewRefGenFields
-        self.vars_options_index_reference_in_view = ttk.StringVar(self, value="1")
+        self.vars_options_index_reference_in_view = ttk.IntVar(self, value=DEFAULT_OPTIONS_START)
 
-        self.vars_options_iteration_step_entry = ttk.StringVar(self, value=str(DEFAULT_OPTIONS_NUMBER_ITERATIONS))
+        self.vars_options_iteration_step_entry = ttk.IntVar(self, value=DEFAULT_OPTIONS_NUMBER_ITERATIONS)
         self.vars_options_iteration_step_entry.trace_add("write", self.controller.handle_step_value_updated)
 
-        self.vars_options_number_iterations_label = ttk.StringVar(self, value=f"{self.vars_options_index_reference_in_view}/{DEFAULT_OPTIONS_NUMBER_ITERATIONS}")
-        self.vars_options_end_value_label = ttk.StringVar(value=f"{DEFAULT_OPTIONS_START + DEFAULT_OPTIONS_NUMBER_ITERATIONS}")
+        self.vars_options_number_iterations_label = ttk.StringVar(self, value=f"1 / {DEFAULT_OPTIONS_NUMBER_ITERATIONS}")
+        self.vars_options_end_value_label = ttk.IntVar(value=(DEFAULT_OPTIONS_START + DEFAULT_OPTIONS_NUMBER_ITERATIONS))
 
     def gui_setup_frames(self):
         if not self.controller:
@@ -161,7 +158,13 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_doctype_dropdown = ttk.Combobox(self, values=list(DROPDOWN_REFERENCE_TYPES.keys()), textvariable=self.vars_options_doctype_dropdown)
 
         self.ui_options_start_label = ttk.Label(self, text="Start")
-        self.ui_options_start_entry = ttk.Entry(self, textvariable=self.vars_options_iteration_start_entry)
+        self.ui_options_start_entry = ttk.Spinbox(
+            self, 
+            from_=DEFAULT_OPTIONS_NUMBER_ITERATIONS, 
+            to=999999, 
+            textvariable=self.vars_options_iteration_start_entry, 
+            wrap=False,
+        )
 
         self.ui_options_step_label = ttk.Label(self, text="N° of iterations") 
         self.ui_options_step_entry = ttk.Spinbox(
