@@ -10,7 +10,7 @@ from .settings import (
     REFGEN_MAX_ITERATIONS,
     REFGEN_MAX_FIELDS,
 )
-from .utils import ScrollBar
+from .utils import ScrollBar, _debug_log_fn_decorator
 from .reference_model import ModelReferenceDatabase
 from .reference_type import DROPDOWN_REFERENCE_TYPES
 
@@ -428,6 +428,7 @@ class ControllerReferenceGenerator:
     # 1. Not sure if models and views should be implemented as dictionary
     # 2. Not sure if this should be placed in app.py as this will communicate between widgets
 
+    @_debug_log_fn_decorator
     def handle_doctype_updated(self, variable_name: str, index: str, mode: str) -> None:
         """
             Called when ViewRefGenOptions.vars_options_doctype_dropdown is updated.
@@ -473,7 +474,7 @@ class ControllerReferenceGenerator:
         self.view_fields.gui_generate_reference_in_view(dictionary_in_view)
         return
         
-        
+    @_debug_log_fn_decorator
     def handle_start_value_updated(self, variable_name: str, index: str, mode: str) -> None:
         #TODO: Update ModelReferenceDatabase.iteration_start_value
         # For each ModelReference in ModelReferenceDatabase, update value_iterable.

@@ -7,6 +7,7 @@ from .settings import (
 )
 
 from .reference_type import ReferenceType
+from .utils import _debug_log_fn_decorator
 
 class ModelReferenceDatabase:
     """
