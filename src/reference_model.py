@@ -40,7 +40,6 @@ class ModelReferenceDatabase:
         """
         Delete reference by index. Ideally, the first reference should not be deleted.
         The only way for the first reference to be deleted is when the database is being rebuilt.
-        The database is rebuilt when 
         """
         if index == 1:
             return

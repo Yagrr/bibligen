@@ -323,17 +323,6 @@ class ViewRefGenFields(ttk.Frame):
     def get_index_reference_in_view(self) -> int:
         return self.index_reference_in_view
 
-    def create_reference_fields(self, model_fields_dict: dict):
-        # TODO: Implement a for loop that goes through each key:values
-        # that are not Author, Report or Year
-        # Add conditions for Author and Editors field
-        # Create a new ViewReferenceField() passing field_name and field_value.
-        # TODO: Create initialise model function in model
-        ...
-
-    def delete_reference_fields(self):
-        ...
-
     def gui_generate_reference_in_view(self, model_fields_dict: dict):
         """
             Generates ViewReferenceField UI objects inside of ViewRefGenFields
@@ -347,7 +336,6 @@ class ViewRefGenFields(ttk.Frame):
         for field_name, field_value in model_fields_dict.items():
             self.fields.append(ViewReferenceField(self, field_name, field_value))
 
-        # TODO: Test if scrollable area needs to be updated since the number of fields would change.
         
     def gui_delete_reference_in_view(self):
         """
@@ -476,6 +464,7 @@ class ControllerReferenceGenerator:
         
     @_debug_log_fn_decorator
     def handle_start_value_updated(self, variable_name: str, index: str, mode: str) -> None:
+        """
         #TODO: Update ModelReferenceDatabase.iteration_start_value
         # For each ModelReference in ModelReferenceDatabase, update value_iterable.
         # GUI: update ViewRefGenOptions.ui_end_value
