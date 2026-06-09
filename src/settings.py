@@ -16,5 +16,7 @@ DEFAULT_PATTERN_FIRST_ITERATION = "[[value]]"
 # Double square brackets, only capturing digit inside. This pattern is used after the first iteration.
 DEFAULT_PATTERN = r"(?:\[\[)\d+(?:\]\])"
 
+REFGEN_MAX_START_VALUE = 999999
+
 REFGEN_MAX_ITERATIONS = 50
 REFGEN_MAX_FIELDS = 15

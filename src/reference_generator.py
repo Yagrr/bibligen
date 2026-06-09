@@ -1,10 +1,12 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.scrolled import ScrolledFrame
+from ttkbootstrap.validation import add_range_validation
 
 from .settings import (
     DEFAULT_OPTIONS_START,
     DEFAULT_OPTIONS_NUMBER_ITERATIONS,
+    REFGEN_MAX_START_VALUE,
     REFGEN_MAX_ITERATIONS,
 )
 from .reference_model import ModelReferenceDatabase
@@ -155,10 +157,11 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_start_entry = ttk.Spinbox(
             self, 
             from_=0, 
-            to=999999, 
+            to=REFGEN_MAX_START_VALUE, 
             textvariable=self.vars_options_iteration_start_entry, 
             wrap=False,
         )
+        add_range_validation(self.ui_options_start_entry, 0, REFGEN_MAX_START_VALUE, when="key")
 
         self.ui_options_step_label = ttk.Label(self, text="N° of iterations") 
         self.ui_options_step_entry = ttk.Spinbox(
@@ -168,6 +171,7 @@ class ViewRefGenOptions(ttk.Frame):
             textvariable=self.vars_options_iteration_step_entry, 
             wrap=False,
         )
+        add_range_validation(self.ui_options_step_entry, 1, REFGEN_MAX_ITERATIONS, when="key")
 
         self.ui_options_end_label = ttk.Label(self, text="End")
         self.ui_options_end_value_label = ttk.Label(self, textvariable=self.vars_options_end_value_label)
