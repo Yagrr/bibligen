@@ -342,8 +342,6 @@ class ViewReferenceField(ttk.Frame):
     ViewRefGenFields: container with a linked controller as an input
     field_name: String for creating label
     field_value (optional): String for populating entry field.
-
-
     """
     def __init__(self, container: ViewRefGenFields, field_name: str, field_value: str="", **kw):
         ttk.Frame.__init__(self, container, **kw)
@@ -559,11 +557,7 @@ class ControllerReferenceGenerator:
 
 
         Logic:
-            - If ViewRefGenFields.index_reference_in_view is greater than the
-                new step count, then reference in view decrement to the step
-                count, and ViewRefGenFields.refresh_view_fields_reference_in_view().
-                Otherwise, leave the reference in view as-is.
-            Model 
+            Use self.model.update_iteration_step() 
             - If new step value is less than the previous:
                 - Delete all entries that exceed the new step value in
                     ModelReferenceDatabase.references[: new_step_value]
@@ -574,12 +568,18 @@ class ControllerReferenceGenerator:
                 - Except for the first reference, replace the pattern in
                     each field value in the reference with the value_iterable
                     (if pattern is present).
+            ViewOptions
+            - If ViewRefGenFields.index_reference_in_view is greater than the
+                new step count, then reference in view decrement to the step
+                count, and ViewRefGenFields.refresh_view_fields_reference_in_view().
+                Otherwise, leave the reference in view as-is.
         """
         start_value: int = int(self.view_options.ui_options_start_entry.get())
         new_step_value: int = int(self.view_options.ui_options_step_entry.get())
 
-        # If step is less than previous, then display the new latest
-        # index_reference_in_view, which is the new step value minus one instead.
+        # If step is less than previous and the reference in view is at a
+        # greater index than the new step, then set the last reference (new step value - 1) as the
+        # new reference in view.
         # If step is greater than previous, leave as-is.
         index_reference_in_view = self.view_options.vars_options_index_reference_in_view.get()
 
@@ -589,7 +589,6 @@ class ControllerReferenceGenerator:
         if index_reference_in_view > (new_step_value - 1):
             self.view_options.vars_options_index_reference_in_view.set(new_step_value - 1)
             index_reference_in_view = new_step_value - 1
-        else:
 
         # Updating labels, end value
         self.view_options.vars_options_end_value_label.set(start_value + new_step_value)
