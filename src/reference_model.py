@@ -140,12 +140,10 @@ class ModelReferenceDatabase:
         """
         Updates the iteration_start_value. This is propagated across all
         references.
-        Also updates the year field value.
         """
         self.vars_iteration_start_value = value
         for i, reference in enumerate(self.references):
             reference.value_iterable = value + i
-            reference.fields["year"] = str(reference.value_iterable)
             # Update pattern in field
             reference.replace_pattern_in_fields_with_iterable()
         return
