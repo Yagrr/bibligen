@@ -156,6 +156,7 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_start_label = ttk.Label(self, text="Start")
         self.ui_options_start_entry = ttk.Spinbox(
             self, 
+            width=15,
             from_=0, 
             to=REFGEN_MAX_START_VALUE, 
             textvariable=self.vars_options_iteration_start_entry, 
@@ -166,6 +167,7 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_step_label = ttk.Label(self, text="N° of iterations") 
         self.ui_options_step_entry = ttk.Spinbox(
             self, 
+            width=15,
             from_=1, 
             to=REFGEN_MAX_ITERATIONS, 
             textvariable=self.vars_options_iteration_step_entry, 
