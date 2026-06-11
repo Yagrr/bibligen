@@ -20,7 +20,7 @@ class ReferenceType(Enum):
     """
     ARTICLE = {
         "item_type": "@article",
-        "author": [],
+        "author": [""],
         "title": "",
         "journal": "",
         "year": "",
@@ -36,13 +36,13 @@ class ReferenceType(Enum):
     }
     BOOK = {
         "item_type": "@book",
-        "author": [],
+        "author": [""],
         "title": "",
         "publisher": "",
         "address": "",
         "year": "",
 
-        "editor": [],
+        "editor": [""],
         "series": "",
         "volume": "",
         "number": "",
@@ -56,13 +56,13 @@ class ReferenceType(Enum):
     }
     BOOKLET = {
         "item_type": "@book",
-        "author": [],
+        "author": [""],
         "title": "",
         "howpublished": "",
         "address": "",
         "year": "",
 
-        "editor": [],
+        "editor": [""],
         "series": "",
         "volume": "",
         "number": "",
@@ -74,7 +74,7 @@ class ReferenceType(Enum):
     }
     CONFERENCE = {
         "item_type": "@conference",
-        "author": [],
+        "author": [""],
         "title": "",
         "booktitle": "",
         "year": "",
@@ -94,13 +94,13 @@ class ReferenceType(Enum):
     }
     INBOOK = {
         "item_type": "@inbook",
-        "author": [],
+        "author": [""],
         "title": "",
         "booktitle": "",
         "publisher": "",
         "year": "",
 
-        "editor": [],
+        "editor": [""],
         "series": "",
         "volume": "",
         "number": "",
@@ -114,13 +114,13 @@ class ReferenceType(Enum):
     }
     INCOLLECTION = {
         "item_type": "@incollection",
-        "author": [],
+        "author": [""],
         "title": "",
         "booktitle": "",
         "publisher": "",
         "year": "",
 
-        "editor": [],
+        "editor": [""],
         "series": "",
         "volume": "",
         "number": "",
@@ -134,12 +134,12 @@ class ReferenceType(Enum):
     }
     INPROCEEDINGS = {
         "item_type": "@inproceedings",
-        "author": [],
+        "author": [""],
         "title": "",
         "booktitle": "",
         "year": "",
 
-        "editor": [],
+        "editor": [""],
         "series": "",
         "volume": "",
         "number": "",
@@ -153,7 +153,7 @@ class ReferenceType(Enum):
     }
     MANUAL = {
         "item_type": "@manual",
-        "author": [],
+        "author": [""],
         "title": "",
         "booktitle": "",
         "year": "",
@@ -170,7 +170,7 @@ class ReferenceType(Enum):
     }
     MASTERSTHESIS = {
         "item_type": "@mastersthesis",
-        "author": [],
+        "author": [""],
         "title": "",
         "school": "",
         "year": "",
@@ -185,7 +185,7 @@ class ReferenceType(Enum):
     """ ALLOW USERS TO ADD CUSTOM FIELDS FOR MISC TYPE """
     MISC = {
         "item_type": "@misc",
-        "author": [],
+        "author": [""],
         "title": "",
         "year": "",
         "howpublished": "",
@@ -194,7 +194,7 @@ class ReferenceType(Enum):
     }
     PHDTHESIS = {
         "item_type": "@mastersthesis",
-        "author": [],
+        "author": [""],
         "title": "",
         "school": "",
         "year": "",
@@ -208,7 +208,7 @@ class ReferenceType(Enum):
     }
     PROCEEDINGS = {
         "item_type": "@proceedings",
-        "editor": [],
+        "editor": [""],
         "title": "",
         "school": "",
         "year": "",
@@ -225,7 +225,7 @@ class ReferenceType(Enum):
     }
     TECHREPORT = {
         "item_type": "@techreport",
-        "author": [],
+        "author": [""],
         "title": "",
         "institution": "",
         "year": "",
@@ -241,7 +241,7 @@ class ReferenceType(Enum):
     # to this document type
     REPORT = {
         "item_type": "@report",
-        "author": [],
+        "author": [""],
         "title": "",
         "institution": "",
         "year": "",
@@ -255,7 +255,7 @@ class ReferenceType(Enum):
     }
     UNPUBLISHED = {
         "item_type": "@unpublished",
-        "author": [],
+        "author": [""],
         "title": "",
         "year": "",
 
