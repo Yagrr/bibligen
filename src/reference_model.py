@@ -72,19 +72,25 @@ class ModelReferenceDatabase:
             reference.replace_pattern_in_fields_with_iterable()
         return
 
-
-    def update_reference_field_at_index(self, value: str, index: int, field_name: str) -> None:
+    def update_reference_field_at_index(self, target_field: str, index_reference: int, new_value: str) -> None:
         """
         Updates the field value for a given index of the reference database.
         """
-        self.references[index].fields[field_name] = value
+        reference = self.get_reference_at_index(index_reference)
+        reference.update_field(target_field, new_value)
         return
 
-    def get_reference_fields_at_index(self, index: int) -> dict:
+
+    def get_reference_at_index(self, index: int):
         """
-        Returns the reference fields at a given index.
+        Returns the ModelReference or None at a given index.
+        Used to update field values.
         """
-        return self.references[index].fields
+        if index >= len(self.references):
+            # TODO: Add error logging
+            raise IndexError("Error while using ModelReferenceDatabase.get_reference_at_index(), index out of range")
+
+        return self.references[index]
 
     def clear_model_reference_fields(self, index: int) -> None:
         """
