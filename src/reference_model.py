@@ -59,6 +59,7 @@ class ModelReferenceDatabase:
         """
         Delete reference by index. The first reference should not be deleted.
         The only way for the first reference to be deleted is when the database is being rebuilt.
+        Skip pattern replacement for the first reference.
         """
         if index == 0:
             # TODO: Log error as the first reference should not be removed.
@@ -66,20 +67,12 @@ class ModelReferenceDatabase:
 
         del self.references[index]
         self.vars_iteration_step_value -= 1
-        for reference in self.references:
+        for i, reference in enumerate(self.references):
             if reference.value_iterable > 0:
                 reference.value_iterable -= 1
-            reference.replace_pattern_in_fields_with_iterable()
+            if i != 0:
+                reference.replace_pattern_in_fields_with_iterable()
         return
-
-    def update_reference_field_at_index(self, target_field: str, index_reference: int, new_value: str) -> None:
-        """
-        Updates the field value for a given index of the reference database.
-        """
-        reference = self.get_reference_at_index(index_reference)
-        reference.update_field(target_field, new_value)
-        return
-
 
     def get_reference_at_index(self, index: int):
         """
@@ -91,6 +84,41 @@ class ModelReferenceDatabase:
             raise IndexError("Error while using ModelReferenceDatabase.get_reference_at_index(), index out of range")
 
         return self.references[index]
+
+    def update_reference_field_at_index(self, target_field: str, index_reference: int, new_value: str) -> None:
+        """
+        Updates the field value for a given index of the reference database.
+        """
+        reference = self.get_reference_at_index(index_reference)
+        reference.update_field(target_field, new_value)
+        return
+
+    # NOTE: Field list interactions
+
+    def update_element_in_reference_field_list(self, target_field: str, index_reference: int, index_list_element: int, new_value: str) -> None:
+        reference = self.get_reference_at_index(index_reference)
+        reference.update_element_in_list_field(target_field, index_list_element, new_value)
+        return
+
+    def add_element_in_reference_field_list_at_index(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.add_element_to_list_field(target_field, index_list_element)
+        return
+
+    def delete_element_in_reference_field_list_at_index(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.delete_element_in_list_field(target_field, index_list_element)
+        return
+
+    def move_element_up_in_reference_list_field(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.move_element_up_in_list_field(target_field, index_list_element)
+        return
+
+    def move_element_down_in_reference_list_field(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.move_element_down_in_list_field(target_field, index_list_element)
+        return
 
     def clear_model_reference_fields(self, index: int) -> None:
         """
@@ -151,7 +179,8 @@ class ModelReferenceDatabase:
         for i, reference in enumerate(self.references):
             reference.value_iterable = value + i
             # Update pattern in field
-            reference.replace_pattern_in_fields_with_iterable()
+            if i != 0:
+                reference.replace_pattern_in_fields_with_iterable()
         return
 
     def update_iteration_step(self, new_step_value: int) -> None:
@@ -233,38 +262,110 @@ class ModelReference:
                 self.fields[field_name] = field_value.replace(DEFAULT_PATTERN_FIRST_ITERATION, f"[[{self.value_iterable}]]")
             else:
                 self.fields[field_name] = re.sub(self.pattern, f"[[{self.value_iterable}]]", field_value)
-        
-    def add_element_to_list_field(self, author_name: str, list_field_name: str) -> None:
+
+    def update_field(self, target_field: str, input_value: str) -> None:
         """
-        Triggered when user modifies author field in ViewRefGenFields.
+        Updates the value of a field given the provided value.
+        Provided that it is not a list type.
+        """
+        self.fields.update({target_field: input_value})
+
+    # NOTE: Field list interactions
+
+    def update_element_in_list_field(self, target_field: str, index_list_element: int, new_value: str) -> None:
+        """
+        Updates the value of an element in a field list (e.g., author, editor)
+        given the target_field name, the index of the element to be modified,
+        and the new value.
+        """
+        field_list = self.fields.get(target_field, None)
+        if field_list is None or not isinstance(field_list, list):
+            #TODO: add error logging. Passed target_field is not a field list.
+            return
+
+        try:
+            field_list[index_list_element] = new_value
+        except IndexError:
+            raise IndexError(f"Error - updating element in list field. Target field: '{target_field}'; Index element: '{index_list_element}'; New value: '{new_value}' ")
+
+        return
+        
+    def add_element_to_list_field(self, target_field: str, index_list_element: int) -> None:
+        """
+        Triggered when user adds a new element in a list field in
+        ViewRefGenFields using the (+) button.
         ModelReferenceDatabase interacts with model in view to add author to list.
+        Adds the new element after the provided index.
 
         List field names include:
         "author"
         "editor"
         """
-        self.fields[list_field_name].append(author_name)
-        return
-
-    def update_element_in_list_field(self, index: str, new_value: str) -> None:
-        """
-        TODO: add_author behaviour needs to be better handled, as there needs
-        to be a way to edit the author's name without appending/removing it.
-        Need to pass index of modified field
-        """
-        ...
-
-    def remove_element_to_list_field(self, author_name: str) -> None:
-        if author_name not in self.fields["author"]:
+        field_list = self.fields.get(target_field, None)
+        if field_list is None or not isinstance(field_list, list):
+            #TODO: add error logging
             return
-        self.fields["author"].remove(author_name)
+
+        self.fields[target_field].insert(index_list_element + 1, "")
         return
 
-    def update_field(self, input_value: str, target_field: str) -> None:
+    def delete_element_in_list_field(self, target_field: str, index_list_element: int) -> None:
         """
-        Updates the value of a field given the provided value.
+        Triggered when the user removes an element in a list field in
+        ViewRefGenFields using the (-) button. Removes the element from the
+        model at the input index value.
         """
-        self.fields.update({target_field: input_value})
+        field_list = self.fields.get(target_field, None)
+        if field_list is None or not isinstance(field_list, list):
+            return
+
+        try:
+            field_list.pop(index_list_element)
+        except IndexError:
+            raise IndexError("Error removing")
+        return
+
+    def move_element_up_in_list_field(self, target_field: str, index_element: int) -> None:
+        """
+        Move an element in a field list closer to 0, or the top of the list.
+        Called when the user interacts with buttons that move the field element up or down.
+        """
+        field_list = self.fields.get(target_field, None)
+
+        if field_list is None or len(field_list == 1) or index_element == 0:
+            # TODO: add error logging. Index out of range, or field list does not exist
+            raise ValueError(f"Error - ModelReference - unable to move element down in list field. Target field: '{target_field}'; Index: '{index_element}'")
+        if index_element >= len(field_list):
+            raise IndexError(f"Error - ModelReference - unable to move element down in list field. Target field: '{target_field}'; Index: '{index_element}'")
+
+        # FIX: Check if swap works correctly
+        print(f"Field list before moving up: {field_list}")
+        field_list[index_element - 1], field_list[index_element] = field_list[index_element], field_list[index_element - 1]
+        print(f"Field list after moving up: {field_list}")
+        return
+
+    def move_element_down_in_list_field(self, target_field: str, index_element: int) -> None:
+        """
+        Move an element in a field list closer to the last index of the list,
+        or the bottom of the list.
+        Called when the user interacts with buttons that move the field element up or down.
+        """
+        field_list = self.fields.get(target_field, None)
+
+        if field_list is None or len(field_list) == 1:
+            # TODO: add error logging. Index out of range, or field list does not exist
+            raise ValueError(f"Error - ModelReference - unable to move element down in list field. Target field: '{target_field}'; Index: '{index_element}'")
+        if index_element >= len(field_list) - 1:
+            # Check if the index is the last index, and if it's outside.
+            raise IndexError(f"Error - ModelReference - unable to move element down in list field - index is last element. Target field: '{target_field}'; Index: '{index_element}'")
+
+        # FIX: Check if swap works correctly
+        print(f"Field list before moving down: {field_list}")
+        field_list[index_element + 1], field_list[index_element] = field_list[index_element], field_list[index_element + 1]
+        print(f"Field list after moving down: {field_list}")
+        return
+
+    # NOTE:  Export functions
     
     def generate_citation_key(self):
         try:
@@ -275,7 +376,8 @@ class ModelReference:
         except IndexError:
             author = "citation_key"
 
-        title = self.fields.get("title", "")[:3]
+        # Use first three words as title
+        title = "".join(self.fields.get("title", "").split()[:3])
         year = self.fields.get("year", "")
         return f"{author}{title}{year}"
 

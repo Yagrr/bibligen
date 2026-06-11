@@ -109,7 +109,6 @@ class ViewRefGenOptions(ttk.Frame):
         self.parent = container
         self.controller: ControllerReferenceGenerator | None = None
         self.gui_setup_grid_layout()
-        #self.gui_setup_frames()
         #self._gui_show_layout()
 
     def setup_view_variables(self):
