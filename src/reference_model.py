@@ -332,7 +332,7 @@ class ModelReference:
         """
         field_list = self.fields.get(target_field, None)
 
-        if field_list is None or len(field_list == 1) or index_element == 0:
+        if field_list is None or len(field_list) == 1 or index_element == 0:
             # TODO: add error logging. Index out of range, or field list does not exist
             raise ValueError(f"Error - ModelReference - unable to move element down in list field. Target field: '{target_field}'; Index: '{index_element}'")
         if index_element >= len(field_list):

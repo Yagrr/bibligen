@@ -24,14 +24,15 @@ class WrapperRefGen(ttk.Frame):
                                         ->Widgets and user interactions
                             -> ContainerRefGenFields
                                     ->WrapperRefGenFields (pack)
-                                            -> .ui_fields_canvasCanvas
                                                 ->ViewRefGenFields (pack, connected to controller)
-                                                        ->ViewReferenceField
-                                                            ->Widgets and user interactions
-                                                        ->ViewReferenceField
-                                                            ->Widgets and user interactions
+                                                    ->ViewReferenceField
+                                                        ->Widgets and user interactions
+                                                    ->ViewReferenceField
+                                                        ->Widgets and user interactions
+                                                    ->ViewReferenceFieldList
+                                                        ->ViewReferenceFieldListElement
+                                                            -> Widgets and user interactions
                                                         ...
-
     """
 
     def __init__(self, container=None, **kw):
@@ -113,7 +114,7 @@ class ViewRefGenOptions(ttk.Frame):
 
     def setup_view_variables(self):
         if self.controller is None:
-            raise Exception("Error: controller not set for ViewRefGenOptions")
+            raise ValueError("Error: controller not set for ViewRefGenOptions")
 
         # Default to "Report"
         self.vars_options_doctype_dropdown = ttk.StringVar(self, value=list(DROPDOWN_REFERENCE_TYPES.keys())[0])
@@ -254,6 +255,16 @@ class ContainerRefGenFields(ttk.Frame):
     """
     Container for RefGenFields for placement in parent frame, and to avoid
     pack() / grid() conflicts.
+    
+    View object hierarchy:
+    WrapperRefGenfields -> ViewRefGenFields -> ViewReferenceField
+                                                    -> ViewReferenceField
+                                                    -> ViewReferenceFieldList
+                                                        -> ViewReferenceFieldListElement
+                                                        -> ViewReferenceFieldListElement
+                                                        ...
+                                                    -> ViewReferenceField
+                                                    ...
     """
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
@@ -270,10 +281,10 @@ class WrapperRefGenFields(ttk.Frame):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
         self.controller: ControllerReferenceGenerator | None = None
-        self.gui_setup_canvas_layout()
+        self.gui_setup_layout()
         #self._gui_show_layout()
 
-    def gui_setup_canvas_layout(self):
+    def gui_setup_layout(self):
         self.view_refgen_fields = ViewRefGenFields(self)
         self.view_refgen_fields.pack(expand=True, fill=tk.BOTH)
 
@@ -295,7 +306,7 @@ class ViewRefGenFields(ScrolledFrame):
         ScrolledFrame.__init__(self, container, **kw)
         self.parent = container
         self.controller: ControllerReferenceGenerator | None = None
-        self.fields: list[ViewReferenceField] = []
+        self.fields: list[ViewReferenceField | ViewReferenceFieldList] = []
         #self._gui_show_layout()
 
     def _gui_show_layout(self):
@@ -312,21 +323,22 @@ class ViewRefGenFields(ScrolledFrame):
         model_fields_dict corresponds to an input dictionary of
         dict[field_name: field_value] pairs. Special fields corresponding
         to a list like Author and Editor logic are to be handled by ViewReferenceField logic.
-
         """
+        if self.controller is None:
+            raise ValueError("Error: controller not set for ViewRefGenFields")
+
         for field_name, field_value in model_fields_dict.items():
             if field_name == "item_type":
                 continue
-            view_reference = ViewReferenceField(self, field_name, field_value)
-            self.fields.append(view_reference)
-
+            elif isinstance(field_value, list):
+                self.fields.append(ViewReferenceFieldList(self, field_name, field_value))
+            else:
+                self.fields.append(ViewReferenceField(self, field_name, field_value))
         
     def gui_delete_reference_in_view(self):
         """
             Destroys all children within the ViewRefGenFields frame.
             This assumes that all of the frame's children are ViewReferenceField.
-            TODO: Check if this affects the scrollable area and check if it
-            needs to be resized
         """
         for field in self.winfo_children():
             field.destroy()
@@ -338,6 +350,9 @@ class ViewReferenceField(ttk.Frame):
     Automatically adds callback function for the fields that are being updated.
     Fields for dates and lists of authors/editors should be handled differently.
 
+    No validation is added for fields like "Year" so that the user is able to
+    iterate using the pattern.
+
     Inputs: 
 
     ViewRefGenFields: container with a linked controller as an input
@@ -347,6 +362,7 @@ class ViewReferenceField(ttk.Frame):
     def __init__(self, container: ViewRefGenFields, field_name: str, field_value: str="", **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent: ViewRefGenFields = container
+        self.field_name: str = field_name
 
         self.gui_setup_grid_layout()
         self.setup_view_variables(field_value)
@@ -357,34 +373,329 @@ class ViewReferenceField(ttk.Frame):
     def get_field_value(self) -> str:
         return self.vars_field_value.get()
     
-    def gui_setup_grid_layout(self):
+    def gui_setup_grid_layout(self) -> None:
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
-    def setup_view_variables(self, field_value):
+    def setup_view_variables(self, field_value) -> None:
         if self.parent is None:
-            raise Exception(f"Error - unable to setup view variables: Inaccessible controller - no parent set for ViewReferenceField '{self}'")
+            raise Exception(f"Error - unable to setup reference fields view variables: Inaccessible controller - no parent set for ViewReferenceField '{self}'")
         if self.parent.controller is None:
-            raise Exception(f"Error - unable to setup view variables: Inaccessible controller - no controller set for '{self.parent}'")
+            raise Exception(f"Error - unable to setup reference fields view variables: Inaccessible controller - no controller set for '{self.parent}'")
 
         self.vars_field_value = ttk.StringVar(self, value=field_value)
-        self.vars_field_value.trace_add("write", self.parent.controller.handle_field_value_updated)
+        self.vars_field_value.trace_add("write", self.handle_field_value_updated)
 
         return
 
-    def gui_create_widgets(self, field_name: str):
-        self.label_field_name = ttk.Label(self, text=f"{field_name.capitalize()}")
     def gui_create_widgets(self, field_name: str) -> None:
         if field_name == "url":
             self.label_field_name = ttk.Label(self, text=f"{field_name}")
         else:
             self.label_field_name = ttk.Label(self, text=f"{field_name.capitalize()}")
-        self.label_field_name.grid(column=0, row=0, sticky="nsew", padx=(25, 10), pady=(0, 5))
+
         self.field_entry = ttk.Entry(self, textvariable=self.vars_field_value)
+
+        self.label_field_name.grid(column=0, row=0, sticky="nsew", padx=(25, 10), pady=(0, 5))
         self.field_entry.grid(column=0, row=1, sticky="nsew", padx=(25, 35))
 
         return
+
+    def handle_field_value_updated(self, variable_name: str, index: str, mode: str) -> None:
+        if self.parent is None:
+            raise Exception(f"Error - unable to setup reference fields view variables: Inaccessible controller - no parent set for ViewReferenceField '{self}'")
+        if self.parent.controller is None:
+            raise Exception(f"Error - unable to setup reference fields view variables: Inaccessible controller - no controller set for '{self.parent}'")
+
+        self.parent.controller.handle_field_value_updated(self.field_name, self.vars_field_value.get())
+        return
+
+
+class ViewReferenceFieldList(ttk.Frame):
+    """
+    Class object representing the View model of a list field; the field data
+    in a ModelReference of type list.
+    Example: {"author": ["John Doe", "Jane Doe"]}
+
+    This class tracks the list of elements in string format so that it can be
+    reused to refresh the ViewReferenceFieldListElement that is displayed,
+    including its ordering. This is absolutely a very hacky way of changing the
+    View since it is done inplace instead of letting the controller do its
+    thing, but I couldn't find a better way to change the ordering of  elements
+    in ViewReferenceFieldList due to how tkinter works.
+    """
+    def __init__(self, container: ViewRefGenFields, field_name: str, list_values: list[str]=[""], **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent: ViewRefGenFields = container
+        self.list_elements: list[ViewReferenceFieldListElement] = []
+        self.list_values: list[str] = list_values
+        self.field_name: str = field_name
+
+        self.refresh_list_element_index(self.list_values)
+        self.pack(side=tk.TOP, fill=tk.X, padx=0, pady=25, anchor="n")
+
+    def gui_create_widgets(self, list_values: list[str]) -> None:
+        """
+        Create field element and enables/disables buttons according to a given
+        element's position in index.
+        """
+        # Create the fields with pack and place them top to bottom
+        for i, field_value in enumerate(list_values):
+            list_element: ViewReferenceFieldListElement = ViewReferenceFieldListElement(self, i, self.field_name, field_value)
+            self.list_elements.append(list_element)
+            self.refresh_field_element_button_states(list_element)
+        return
+
+    def refresh_list_element_index(self, list_values: list[str]) -> None:
+        """
+        Function that corrects the index attribute of each element.
+        This function should be called everytime the order of the elements are modified.
+        """
+        self.gui_delete_field_elements()
+        self.gui_create_widgets(list_values)
+        for list_element in self.list_elements:
+            self.refresh_field_element_button_states(list_element)
+    
+    def refresh_field_element_button_states(self, list_element) -> None:
+        """
+        Modify field element button states based on index.
+        This function is invoked here instead of being placed in the
+        ViewReferenceFieldListElement class in order to access the length
+        of self.list_elements.
+        """
+        # Activate/deactivate buttons based on index position
+        print(f"refresh, list_element.index {list_element.index}")
+        if list_element.index == 0:
+            # Index is the first, disable move up.
+            list_element.ui_button_move_element_up.config(state="disabled") 
+            if len(self.list_elements) > 1:
+                # More than one element, enable delete and up button
+                list_element.ui_button_move_element_down.config(state="normal") 
+                list_element.ui_button_delete_element.config(state="normal") 
+            else:
+                # Only one element, disable both move up and down buttons, and delete buttons
+                list_element.ui_button_move_element_down.config(state="disabled") 
+                list_element.ui_button_delete_element.config(state="disabled") 
+            return
+
+        if list_element.index == len(self.list_elements) - 1:
+            # List element is the last and has more than one list element
+                # More than one element, enable up button
+            list_element.ui_button_move_element_up.config(state="normal") 
+            list_element.ui_button_delete_element.config(state="normal") 
+            list_element.ui_button_move_element_down.config(state="disabled") 
+            return
+
+        # Element is not the first nor the last
+        # More than one element, enable all buttons
+        list_element.ui_button_move_element_up.config(state="normal") 
+        list_element.ui_button_move_element_down.config(state="normal") 
+        list_element.ui_button_delete_element.config(state="normal") 
+        return
+
+    def gui_delete_field_elements(self) -> None:
+        """
+        Delete both at index from the list and delete the element itself
+        """
+        print("View Field List - Delete field elements")
+        for i, field_element in enumerate(self.winfo_children()):
+            field_element.destroy()
+        self.list_elements = []
+        return
+
+    def gui_move_element_up(self, index_element: int) -> None:
+        """
+        Move the view of an element closer to 0, or the top of the list.
+        Use refresh_list_element_index to redraw view.
+        """
+        # signature: requires target_field and index
+        print(f"View Field List - Move element up {self.list_values}")
+        if self.parent.controller is None:
+            raise ValueError("Error - ViewReferenceFieldList - move field list element up: controller not set for ViewRefGenFields")
+
+        if len(self.list_values) <= 1:
+            # Check if list_element is not empty or only one element
+            raise ValueError("Error - ViewReferenceFieldList - move field list element up: list_values is empty or only has one value")
+
+        if index_element >= len(self.list_values):
+            raise IndexError(f"Error - ViewReferenceFieldList - move field list element up: index out of bounds. Index: {index_element} ")
+
+        target_field: str = self.field_name
+        # Callback function to handle model
+        self.parent.controller.handle_field_list_move_element_up_button_clicked(target_field, index_element)
+
+        print(f"View Field List - Elements after moving up: {self.list_values}")
+        self.refresh_list_element_index(self.list_values)
+        return
+
+    def gui_move_element_down(self, index_element: int) -> None:
+        print(f"View Field List - Move element down {self.list_values}")
+        if self.parent.controller is None:
+            raise ValueError("Error - ViewReferenceFieldList - move field list element down: controller not set for ViewRefGenFields")
+
+        if index_element >= len(self.list_values) - 1:
+            # Check if it's last element, cannot move element further down
+            raise IndexError(f"Error - ViewReferenceFieldList - move field list element down: index out of bounds {index_element}, number of elements: {len(self.list_values) - 1}")
+
+        target_field: str = self.field_name
+        self.parent.controller.handle_field_list_move_element_down_button_clicked(target_field, index_element)
+        print(f"View Field List - Elements after moving down: {self.list_values}")
+        self.refresh_list_element_index(self.list_values)
+
+        return
+
+    def handle_field_value_updated(self, index_element: int, new_value: str) -> None:
+        print(f"View Field List - Update field value {self.list_values}")
+        if self.parent.controller is None:
+            raise ValueError("Error - ViewReferenceFieldList - update field list element: controller not set for ViewRefGenFields")
+
+        target_field: str = self.field_name
+        # Send data to controller and model
+        self.parent.controller.handle_field_list_element_value_updated(target_field, index_element, new_value)
+
+        # Update list elements - no need to refresh the View
+        self.list_values[index_element] = new_value
+        print(f"View Field List - After element update: {self.list_values}")
+        return
+
+    def gui_add_element_below(self, index_element: int) -> None:
+        print(f"View Field List - Add element below {self.list_values}")
+        if self.parent.controller is None:
+            raise ValueError("Error - ViewReferenceFieldList - add field list element: controller not set for ViewRefGenFields")
+
+        target_field: str = self.field_name
+        self.parent.controller.handle_field_list_add_element_below_button_clicked(target_field, index_element)
+
+        # Add element below given index with empty string.
+        print(f"View Field List - After adding element below {self.list_values}")
+        self.refresh_list_element_index(self.list_values)
+        print(f"View Field List - After adding element below {self.list_values}")
+
+        return
+
+    def gui_delete_element(self, index_element: int) -> None:
+        print(f"View Field List - Deleting element {self.list_values}")
+        if self.parent.controller is None:
+            raise ValueError("Error - ViewReferenceFieldList - delete field list element: controller not set for ViewRefGenFields")
+
+        if len(self.list_values) <= 1:
+            # Check if list_element is not empty or only one element
+            # The list cannot be empty.
+            raise ValueError("Error - ViewReferenceFieldList - delete field list element: list_values is empty or only has one value")
+
+        if index_element >= len(self.list_values):
+            raise IndexError(f"Error - ViewReferenceFieldList - delete field list element: index out of bounds {index_element}, number of elements: {len(self.list_values) - 1}")
+
+        print(f"View Field List - number of elements before deletion: {len(self.list_elements)}")
+        print(f"View Field List - number of values before deletion: {len(self.list_values)}")
+
+        target_field: str = self.field_name
+        self.parent.controller.handle_field_list_delete_element_button_clicked(target_field, index_element)
+
+        # Update list_values
+        print(f"View Field List - After deleting element {self.list_values}")
+        self.refresh_list_element_index(self.list_values)
+        print(f"View Field List - number of elements after deletion: {len(self.list_elements)}")
+        print(f"View Field List - number of values after deletion: {len(self.list_values)}")
+        return
+
+
+class ViewReferenceFieldListElement(ttk.Frame):
+    """
+    Class object representing an element in a field list and its associated widgets.
+
+    The callback functions of a given element also invokes function calls to
+    its parent ViewReferenceFieldList, which is connected to the Controller.
+    This effectively allows data to bubble up from the View to the Model.
+
+    Example: Author field element with buttons to move up or down, add element
+    below, or delete itself.
+    """
+    def __init__(self, container: ViewReferenceFieldList, index: int, field_name, field_value: str="", **kw):
+        ttk.Frame.__init__(self, container, **kw)
+        self.parent: ViewReferenceFieldList = container
+        self.index: int = index
+        self.pack(side=tk.TOP, fill=tk.X, padx=0, pady=10, anchor="n")
+        self.widget_wrapper = ttk.Frame(self)
+        self.widget_wrapper.pack(side=tk.TOP, fill=tk.X, padx=0, anchor="n")
+
+        self.gui_setup_grid_layout()
+        self.setup_view_variables(field_value)
+        self.gui_create_widgets(field_name)
+
+    def gui_setup_grid_layout(self) -> None:
+
+        self.widget_wrapper.rowconfigure(0, weight=1)
+        self.widget_wrapper.columnconfigure(0, weight=1)
+        self.widget_wrapper.columnconfigure(1, weight=1)
+        self.widget_wrapper.columnconfigure(2, weight=1)
+        self.widget_wrapper.columnconfigure(3, weight=4)
+        self.widget_wrapper.columnconfigure(4, weight=1)
+        self.widget_wrapper.columnconfigure(5, weight=1)
+
+    def setup_view_variables(self, field_value) -> None:
+        if self.parent is None:
+            raise Exception(f"Error - unable to setup reference list element view variables: Inaccessible controller - no parent set for ViewReferenceField '{self}'")
+
+        self.vars_field_value = ttk.StringVar(self, value=field_value)
+        self.vars_field_value.trace_add("write", self.handle_field_value_updated)
+
+    def gui_create_widgets(self, field_name):
+        """
+        Create widgets and attach event listeners.
+        """
+        self.ui_button_move_element_up = ttk.Button(self.widget_wrapper, width=2, text="↑", command=self.handle_move_element_up)
+        self.ui_button_move_element_down = ttk.Button(self.widget_wrapper, width=2, text="↓", command=self.handle_move_element_down)
+
+        self.label_field_name = ttk.Label(self.widget_wrapper, text=f"{field_name.capitalize()}")
+
+        self.field_entry = ttk.Entry(self.widget_wrapper, textvariable=self.vars_field_value)
+
+        self.ui_button_add_element_below = ttk.Button(self.widget_wrapper, width=2, text="+", command=self.handle_add_element_below)
+        self.ui_button_delete_element = ttk.Button(self.widget_wrapper, width=2, text="-", command=self.handle_delete_element)
+
+        self.ui_button_move_element_up.grid(column=0, row=0, padx=0)
+        self.ui_button_move_element_down.grid(column=1, row=0, padx=0)
+        self.label_field_name.grid(column=2, row=0, padx=2)
+        self.field_entry.grid(column=3, row=0, sticky="ew")
+        self.ui_button_add_element_below.grid(column=4, row=0, padx=0)
+        self.ui_button_delete_element.grid(column=5, row=0, padx=0)
+
+    """
+    HACK:
+    Couldn't figure out how to cleanly pass View element data to
+    controller callback function with tkinter, so I'm using this method of calling the
+    element's parent's functions and passing attributes of an field element
+    instance so the controller functions properly works.
+    """
+
+    def handle_move_element_up(self) -> None:
+        print(f"Element index: {self.index}")
+        self.parent.gui_move_element_up(self.index)
+        return
+
+    def handle_move_element_down(self) -> None:
+        print(f"Element index: {self.index}")
+        self.parent.gui_move_element_down(self.index)
+        return
+
+    def handle_add_element_below(self) -> None:
+        print(f"Element index: {self.index}")
+        self.parent.gui_add_element_below(self.index)
+        return
+
+    def handle_delete_element(self) -> None:
+        print(f"Element index: {self.index}")
+        self.parent.gui_delete_element(self.index)
+        return
+
+    def handle_field_value_updated(self, variable_name: str, index: str, mode: str) -> None:
+        print(f"Element index: {self.index}")
+        new_value: str = self.vars_field_value.get()
+        self.parent.handle_field_value_updated(self.index, new_value)
+        return
+
 
 class ControllerReferenceGenerator:
     """
@@ -405,12 +716,15 @@ class ControllerReferenceGenerator:
 
         if self.view_fields.controller is None:
             self.view_fields.controller = self
+
         self.view_options.setup_view_variables()
         self.view_options.gui_setup_frames()
 
+        # self.view_fields.gui_setup_frames()
+
         # Disable buttons as there is only one reference on initialisaiton
         self.refresh_view_options_reference_in_view()
-        # Show first reference
+        # Show first reference and pass controller to list fields
         self.refresh_view_fields_reference_in_view()
 
     def refresh_view_fields_reference_in_view(self) -> None:
@@ -457,7 +771,7 @@ class ControllerReferenceGenerator:
             self.view_options.ui_options_previous_iteration_button.config(state="disabled")
 
             if len(self.model.references) > 1:
-                # More than one one reference, enable next button
+                # More than one reference, enable next button
                 self.view_options.ui_options_next_iteration_button.config(state="normal")
             else:
                 # Only one reference, disable next button
@@ -697,7 +1011,7 @@ class ControllerReferenceGenerator:
         """
         index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
 
-        # catch error if function is activated somehow even when index is the last
+        # catch error if function is activated somehow even when index is the last one
         last_index = len(self.model.references) - 1
         if index_reference_in_view == last_index:
             # TODO: log error
@@ -715,11 +1029,73 @@ class ControllerReferenceGenerator:
         self.refresh_view_fields_reference_in_view()
         return
 
-    def handle_field_value_updated(self, variable_name: str, index: str, mode: str) -> None:
-        # Pass field_name.
-        # Triggered when value is updated and clicked off
-        # Updates ReferenceModel from UI interaction
-        # Need to pass which reference is in view so the model
-        # knows which reference to update
-        # Triggers 
-        ...
+    def handle_field_value_updated(self, target_field: str, new_value: str) -> None:
+        index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.update_reference_field_at_index(target_field, index_reference_in_view, new_value) 
+        return
+
+    def handle_field_list_element_value_updated(self, target_field: str, index_list_element: int, new_value: str) -> None:
+        index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.update_element_in_reference_field_list(target_field, index_reference_in_view, index_list_element, new_value)
+        return
+
+    """
+    Field list element manipulation functions are located below.
+    ViewReferenceFieldListElement represent things like an individual author or
+    editor. They are stored within a field list, representing the ensemble of authors or editors.
+
+    These functions are invoked from within ViewReferenceFieldList after
+    bubble-up callback function in ViewReferenceFieldListElement is invoked
+    upon user interaction.
+
+    They work as follows:
+    User Interaction -> ViewReferenceFieldListElement -callback function-> ViewReferenceFieldList  -calls-> Controller -calls-> Model
+
+    Note that in this instance, the view handles itself, and is not controlled by the controller.
+
+    Detailed explanation:
+    - User interacts with the button widgets within ViewReferenceFieldListElement
+      - This invokes the respective callback function (i.e., add element below)
+        within the ViewReferenceFieldListElement instance.
+        - These callback functions call the respective function of its parent,
+          ViewReferenceFieldList (i.e., add element below)
+
+    - ViewReferenceFieldList keeps track of all ViewReferenceFieldListElement
+      in a list
+        - The reason why each ViewReferenceFieldListElement instance have their
+          own callback functions that calls functions within
+          ViewReferenceFieldList is because I couldn't figure out how to pass
+          parameter values through callback functions. We need to pass the
+          position of the list element within the list to be able to modify the
+          element in the model at a given reference index.
+
+    - ViewReferenceFieldList keeps track of the state of the widgets, and
+      handles the logic for when a button should be disabled or not.
+        - It refreshes the widgets to reflect how the internal Model has changed.
+    """
+
+    def handle_field_list_add_element_below_button_clicked(self, target_field, index_list_element: int):
+        index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.add_element_in_reference_field_list_at_index(target_field, index_reference_in_view, index_list_element)
+        return
+
+    def handle_field_list_delete_element_button_clicked(self, target_field, index_list_element: int):
+        index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.delete_element_in_reference_field_list_at_index(target_field, index_reference_in_view, index_list_element)
+        return
+
+    def handle_field_list_move_element_up_button_clicked(self, target_field: str, index_list_element: int) -> None:
+        """
+        In list field, handle "up element up" button click event.
+        """
+        index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.move_element_up_in_reference_list_field(target_field, index_reference_in_view, index_list_element)
+        return
+
+    def handle_field_list_move_element_down_button_clicked(self, target_field: str, index_list_element: int) -> None:
+        """
+        In list field, handle "move element down" button click event.
+        """
+        index_reference_in_view: int = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.move_element_down_in_reference_list_field(target_field, index_reference_in_view, index_list_element)
+        return
