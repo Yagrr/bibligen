@@ -10,11 +10,11 @@ class WrapperOutputWindow(ttk.Frame):
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
-        self.output_window = OutputWindow(self)
+        self.output_window = ViewOutputWindow(self)
         self.output_window.pack(expand=True, fill=tk.BOTH)
 
 
-class OutputWindow(ScrolledText):
+class ViewOutputWindow(ScrolledText):
     def __init__(self, container=None, **kw):
         ScrolledText.__init__(self, container, **kw)
         self.parent = container
