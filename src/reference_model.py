@@ -130,8 +130,8 @@ class ModelReferenceDatabase:
         """
         reference = self.references[index]
 
-        for field_name, field_value in reference.fields:
-            if field_name in ["item_type", "author", "editor", "year"] or reference.pattern in field_value:
+        for field_name, field_value in reference.fields.items():
+            if field_name in ["item_type", "author", "editor", "year"] or f"[[{reference.value_iterable}]]" in field_value or "[[value]]" in field_value:
                 continue
             else:
                 reference.fields[field_name] = ""
