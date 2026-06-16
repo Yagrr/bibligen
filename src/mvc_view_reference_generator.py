@@ -95,11 +95,11 @@ class ViewRefGenOptions(ttk.Frame):
         self.gui_setup_grid_layout()
         #self._gui_show_layout()
 
-    def setup_view_variables(self):
+    def setup_view_variables(self) -> None:
         if self.controller is None:
             raise ValueError("Error: controller not set for ViewRefGenOptions")
 
-        # Default to "Report"
+        # NOTE: Default to "Report"
         self.vars_options_doctype_dropdown = ttk.StringVar(self, value=list(DROPDOWN_REFERENCE_TYPES.keys())[0])
         self.vars_options_doctype_dropdown.trace_add("write", self.controller.handle_doctype_updated)
 
@@ -114,8 +114,8 @@ class ViewRefGenOptions(ttk.Frame):
         self.vars_options_number_iterations_label = ttk.StringVar(self, value=f"1 / {DEFAULT_OPTIONS_NUMBER_ITERATIONS}")
         self.vars_options_end_value_label = ttk.IntVar(value=(DEFAULT_OPTIONS_START + DEFAULT_OPTIONS_NUMBER_ITERATIONS))
  
-    def gui_setup_grid_layout(self):
-        # Create 4x4 layout
+    def gui_setup_grid_layout(self) -> None:
+        # NOTE: Create 4x4 layout
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.rowconfigure(2, weight=1)
@@ -126,7 +126,11 @@ class ViewRefGenOptions(ttk.Frame):
         self.columnconfigure(2, weight=1)
         self.columnconfigure(3, weight=1)
 
-    def gui_setup_frames(self):
+    def gui_setup_frames(self) -> None:
+        """
+        Invoke widgets and place them on the grid.
+        Requires controller to be set as widgets are tied to controller.
+        """
         if not self.controller:
             raise Exception("Error: controller not set for ViewRefGenOptions")
         self.ui_options_header_iteration_settings = ttk.Label(self, text="Iteration settings")
@@ -173,7 +177,6 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_previous_iteration_button = ttk.Button(self, width=15, text="Previous", command=self.controller.handle_previous_button_clicked)
         self.ui_options_next_iteration_button = ttk.Button(self, width=15, text="Next", command=self.controller.handle_next_button_clicked)
 
-        # Place objects in RefGenOptions frame
         self.ui_widget_separator.grid(column=0, row=4, columnspan=4, sticky="sew")
         self.ui_options_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=2, padx=(15, 0))
         self.ui_options_doctype_label.grid(column=0, row=1, sticky="nsew", padx=(15, 0))
@@ -193,9 +196,9 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_previous_iteration_button.grid(column=2, row=4)
         self.ui_options_next_iteration_button.grid(column=3, row=4)
 
-    def _gui_show_layout(self):
+    def _gui_show_layout(self) -> None:
         """
-        Private function for development for showing how the frame's current layout
+        Private function for development for showing the frame's current layout
         """
         self.ui_layout_iteration_settings = ttk.Label(self, text="Iteration settings", background="purple", anchor="center")
         self.ui_layout_doctype_label = ttk.Label(self, text="Document type", background="red", anchor="center")
@@ -211,7 +214,7 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_layout_generate_button = ttk.Label(self, text="Generate button", background="green", anchor="center")
         self.ui_layout_clear_fields_button = ttk.Label(self, text="Clear fields", background="blue", anchor="center")
         self.ui_layout_delete_iteration_button = ttk.Label(self, text="Delete iteration", background="black", anchor="center")
-        self.ui_layout_number_iterations_label = ttk.Label(self, text="[first step value 1 / last step value 6]", background="pink", anchor="center")
+        self.ui_layout_number_iterations_label = ttk.Label(self, text="[first step value / last step value]", background="pink", anchor="center")
         self.ui_layout_previous_iteration_button = ttk.Label(self, text="Previous button here", background="grey", anchor="center")
         self.ui_layout_next_iteration_button = ttk.Label(self, text="Next button here", background="black", anchor="center")
 
