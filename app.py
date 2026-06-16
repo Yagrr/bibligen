@@ -67,7 +67,7 @@ class UserInterface(ttk.Frame):
         self.refgen_model = ModelReferenceDatabase()
         self.refgen_options = self.frame_left.container_ref_gen.wrapper_refgen_options.view_frame
         self.refgen_fields = self.frame_left.container_ref_gen.wrapper_refgen_fields.view_frame.view_refgen_fields
-        self.refgen_output = self.frame_right.output_window
+        self.refgen_output = self.frame_right.ui_output_window
         self.controller = Controller(
             self.refgen_model, 
             self.refgen_options, 
