@@ -28,7 +28,7 @@ Bibligen is a GUI-based .bib generator for quickly creating reference entries in
 2. Clone the repository locally or install as .zip file, and run Bibligen from the command line
 
 ```shell
-git clone <URL>
+git clone git@github.com:Yagrr/bibligen.git
 cd bibligen
 uv run main.py
 ```
