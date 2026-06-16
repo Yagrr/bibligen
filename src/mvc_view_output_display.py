@@ -15,8 +15,8 @@ class WrapperOutputWindow(ttk.Frame):
         self.ui_output_window.pack(expand=True, fill=tk.BOTH)
         self.ui_save_to_file = ttk.Button(self, width=10, text="Save to file", command=self.show_save_to_file_dialog)
         self.ui_copy_to_clipboard_button = ttk.Button(self, width=5, text="Copy", command=self.copy_to_clipboard)
-        self.ui_save_to_file.place(x=110, y=910)
-        self.ui_copy_to_clipboard_button.place(x=20, y=910)
+        self.ui_save_to_file.place(x=800, y=950, anchor="se")
+        self.ui_copy_to_clipboard_button.place(x=900, y=950, anchor="se")
 
     def show_save_to_file_dialog(self) -> None:
         file = asksaveasfile(mode="w", defaultextension=".bib")
