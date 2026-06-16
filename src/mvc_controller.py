@@ -17,6 +17,8 @@ class Controller:
         self.view_options = view_options
         self.view_fields = view_fields
         self.view_output = view_output
+        self.old_start_value: int = 0
+        self.old_step_value: int = 1
 
     def initialise_mvc(self):
         if self.view_options.controller is None:
@@ -156,8 +158,16 @@ class Controller:
               ModelReferenceDatabase.update_iteration_start()
             - Refresh reference in view to reflect new changes.
         """
-        new_start_value: int = self.view_options.vars_options_iteration_start_entry.get()
-        step_value: int = self.view_options.vars_options_iteration_step_entry.get()
+        try:
+            new_start_value: int = int(self.view_options.ui_options_start_entry.get())
+            step_value: int = int(self.view_options.ui_options_step_entry.get())
+            self.old_start_value = new_start_value
+            self.old_step_value = step_value
+        except ValueError:
+            # Entry fields have validation, ValueError typically triggered when all characters are erased
+            new_start_value = self.old_start_value
+            step_value = self.old_step_value
+
         if len(self.model.references) == 1:
             self.view_options.vars_options_end_value_label.set(new_start_value)
         else:
@@ -207,8 +217,15 @@ class Controller:
                 count, and ViewRefGenFields.refresh_view_fields_reference_in_view().
                 Otherwise, leave the reference in view as-is.
         """
-        start_value: int = int(self.view_options.ui_options_start_entry.get())
-        new_step_value: int = int(self.view_options.ui_options_step_entry.get())
+        try:
+            start_value: int = int(self.view_options.ui_options_start_entry.get())
+            new_step_value: int = int(self.view_options.ui_options_step_entry.get())
+            self.old_start_value = start_value
+            self.old_step_value = new_step_value
+        except ValueError:
+            # Entry fields have validation, ValueError typically triggered when all characters are erased
+            start_value = self.old_start_value
+            new_step_value = self.old_step_value
 
         # If step is less than previous and the reference in view is at a
         # greater index than the new step, then set the last reference (new step value - 1) as the
