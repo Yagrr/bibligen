@@ -17,6 +17,7 @@ class WrapperRefGen(ttk.Frame):
     """
     Parent GUI Frame container to contain "reference generator options" container
     and the "reference fields" container.
+
     UI object hierarchy:
     Wrapper RefGen -> ContainerRefGen (grid)
                             -> WrapperRefGenOptions
@@ -270,11 +271,11 @@ class WrapperRefGenFields(ttk.Frame):
         self.gui_setup_layout()
         #self._gui_show_layout()
 
-    def gui_setup_layout(self):
+    def gui_setup_layout(self) -> None:
         self.view_refgen_fields = ViewRefGenFields(self)
         self.view_refgen_fields.pack(expand=True, fill=tk.BOTH)
 
-    def _gui_show_layout(self):
+    def _gui_show_layout(self) -> None:
         self.test = ttk.Label(self, text="Hello!", background="blue", anchor="center")
         self.test.pack(expand=True, fill=tk.BOTH)
         self.test2 = ttk.Label(self, text="Goodbye!", background="blue", anchor="center")
@@ -295,12 +296,12 @@ class ViewRefGenFields(ScrolledFrame):
         self.fields: list[ViewReferenceField | ViewReferenceFieldList] = []
         #self._gui_show_layout()
 
-    def _gui_show_layout(self):
+    def _gui_show_layout(self) -> None:
         for i in range(5):
             field_label = ttk.Label(self, text="Fields", background="blue", anchor="center", font=("Arial", 12))
             field_label.pack(expand=True, fill=tk.BOTH, padx=0, pady=20, anchor="n")
 
-    def gui_generate_reference_in_view(self, model_fields_dict: dict):
+    def gui_generate_reference_in_view(self, model_fields_dict: dict) -> None:
         """
         Generates ViewReferenceField UI objects inside of ViewRefGenFields
         canvas to be displayed.
@@ -321,7 +322,7 @@ class ViewRefGenFields(ScrolledFrame):
             else:
                 self.fields.append(ViewReferenceField(self, field_name, field_value))
         
-    def gui_delete_reference_in_view(self):
+    def gui_delete_reference_in_view(self) -> None:
         """
             Destroys all children within the ViewRefGenFields frame.
             This assumes that all of the frame's children are ViewReferenceField.
@@ -629,7 +630,7 @@ class ViewReferenceFieldListElement(ttk.Frame):
         self.vars_field_value = ttk.StringVar(self, value=field_value)
         self.vars_field_value.trace_add("write", self.handle_field_value_updated)
 
-    def gui_create_widgets(self, field_name):
+    def gui_create_widgets(self, field_name) -> None:
         """
         Create widgets and attach event listeners.
         """

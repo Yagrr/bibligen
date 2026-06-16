@@ -20,10 +20,7 @@ class ViewOutputWindow(ScrolledText):
         self.parent = container
         self.text["state"] = "disabled"
 
-        test = []
-        for i in range(50):
-            test.append("hello\n")
-        self.set_output_text("".join(test))
+        self.set_output_text("Click 'Generate entries' to refresh\n")
 
     def set_output_text(self, text: str) -> None:
         self.text["state"] = "normal"

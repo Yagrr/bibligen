@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from mvc_model import ModelReferenceDatabase
     from mvc_view_reference_generator import ViewRefGenOptions, ViewRefGenFields
+    from mvc_view_output_display import ViewOutputWindow
 
 class Controller:
     """
@@ -11,10 +12,11 @@ class Controller:
     Ex: If X button is clicked, then Y happens to internal data, and Z GUI
     element is updated.
     """
-    def __init__(self, model: "ModelReferenceDatabase", view_options: "ViewRefGenOptions", view_fields: "ViewRefGenFields"):
+    def __init__(self, model: "ModelReferenceDatabase", view_options: "ViewRefGenOptions", view_fields: "ViewRefGenFields", view_output: "ViewOutputWindow"):
         self.model = model
         self.view_options = view_options
         self.view_fields = view_fields
+        self.view_output = view_output
 
     def initialise_mvc(self):
         if self.view_options.controller is None:
@@ -228,10 +230,10 @@ class Controller:
     def handle_generate_button_clicked(self) -> None:
         """
         Call self.model.convert_refs_to_bib() function, then send output to Console window.
-        TODO: Create console window first. To determine how it can be handled.
         """
         output_str = self.model.convert_refs_to_bib()
-        # Send output to output window.
+        self.view_output.set_output_text(output_str)
+        return
 
     def handle_clear_fields_button_clicked(self) -> None:
         """
