@@ -103,6 +103,7 @@ class ModelReferenceDatabase:
         if len(self.references) == 1:
             return
         reference_copy = deepcopy(self.references[0])
+        reference_copy.pattern = self.vars_iterable_string_pattern
         reference_copy.value_iterable += index
         # Replace fields with pattern
         reference_copy.replace_pattern_in_fields_with_iterable()
