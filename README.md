@@ -11,7 +11,7 @@ Creating entries in reference managers for annual reports is very time-consuming
 Bibligen is a GUI-based .bib generator for quickly creating reference entries in bulk, by allowing iterable values to be placed in the reference entries' fields (declared using `[[value]]`).
 
 
-> **Important**: This is a hobby project made to solve a problem that I face frequently enough for me to create this. Contributions are welcome, no commitments and no specific roadmaps are provided. Use at your own risk.
+> **Important Disclaimer**: This is a hobby project made to serve the dual-purpose of solving a problem that I face frequently enough for me to create this, and for me to learn how to create something from scratch. Contributions are welcome, no commitments and no specific roadmaps are provided. Use at your own risk. This project was programmed by hand with little to no AI assistance.
 
 <div align="center">
     <img src="docs/bibligen.png" alt="Screenshot of the Bibligen app on Linux" width="950" height="500">
