@@ -442,7 +442,6 @@ class ModelReference:
                     bib_fields.append("},\n")
                 case _:
                     # Replace pattern with value iterable without square brackets.
-                    print(f"ModelReference - Replaced pattern: {self.pattern} with {self.value_iterable}")
                     field_value_final = re.sub(self.pattern, str(self.value_iterable), field_value)
                     bib_fields.append(f"\t{field_name} = {{{field_value_final}}}")
                     if field_name == last_field:

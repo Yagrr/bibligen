@@ -449,7 +449,6 @@ class ViewReferenceFieldList(ttk.Frame):
         of self.list_elements.
         """
         # Activate/deactivate buttons based on index position
-        print(f"refresh, list_element.index {list_element.index}")
         if list_element.index == 0:
             # Index is the first, disable move up.
             list_element.ui_button_move_element_up.config(state="disabled") 
@@ -482,7 +481,6 @@ class ViewReferenceFieldList(ttk.Frame):
         """
         Delete both at index from the list and delete the element itself
         """
-        print("View Field List - Delete field elements")
         for i, field_element in enumerate(self.winfo_children()):
             field_element.destroy()
         self.list_elements = []
@@ -494,7 +492,6 @@ class ViewReferenceFieldList(ttk.Frame):
         Use refresh_list_element_index to redraw view.
         """
         # signature: requires target_field and index
-        print(f"View Field List - Move element up {self.list_values}")
         if self.parent.controller is None:
             raise ValueError("Error - ViewReferenceFieldList - move field list element up: controller not set for ViewRefGenFields")
 
@@ -509,12 +506,10 @@ class ViewReferenceFieldList(ttk.Frame):
         # Callback function to handle model
         self.parent.controller.handle_field_list_move_element_up_button_clicked(target_field, index_element)
 
-        print(f"View Field List - Elements after moving up: {self.list_values}")
         self.refresh_list_element_index(self.list_values)
         return
 
     def gui_move_element_down(self, index_element: int) -> None:
-        print(f"View Field List - Move element down {self.list_values}")
         if self.parent.controller is None:
             raise ValueError("Error - ViewReferenceFieldList - move field list element down: controller not set for ViewRefGenFields")
 
@@ -524,13 +519,11 @@ class ViewReferenceFieldList(ttk.Frame):
 
         target_field: str = self.field_name
         self.parent.controller.handle_field_list_move_element_down_button_clicked(target_field, index_element)
-        print(f"View Field List - Elements after moving down: {self.list_values}")
         self.refresh_list_element_index(self.list_values)
 
         return
 
     def handle_field_value_updated(self, index_element: int, new_value: str) -> None:
-        print(f"View Field List - Update field value {self.list_values}")
         if self.parent.controller is None:
             raise ValueError("Error - ViewReferenceFieldList - update field list element: controller not set for ViewRefGenFields")
 
@@ -540,11 +533,9 @@ class ViewReferenceFieldList(ttk.Frame):
 
         # Update list elements - no need to refresh the View
         self.list_values[index_element] = new_value
-        print(f"View Field List - After element update: {self.list_values}")
         return
 
     def gui_add_element_below(self, index_element: int) -> None:
-        print(f"View Field List - Add element below {self.list_values}")
         if self.parent.controller is None:
             raise ValueError("Error - ViewReferenceFieldList - add field list element: controller not set for ViewRefGenFields")
 
@@ -552,14 +543,11 @@ class ViewReferenceFieldList(ttk.Frame):
         self.parent.controller.handle_field_list_add_element_below_button_clicked(target_field, index_element)
 
         # Add element below given index with empty string.
-        print(f"View Field List - After adding element below {self.list_values}")
         self.refresh_list_element_index(self.list_values)
-        print(f"View Field List - After adding element below {self.list_values}")
 
         return
 
     def gui_delete_element(self, index_element: int) -> None:
-        print(f"View Field List - Deleting element {self.list_values}")
         if self.parent.controller is None:
             raise ValueError("Error - ViewReferenceFieldList - delete field list element: controller not set for ViewRefGenFields")
 
@@ -571,17 +559,11 @@ class ViewReferenceFieldList(ttk.Frame):
         if index_element >= len(self.list_values):
             raise IndexError(f"Error - ViewReferenceFieldList - delete field list element: index out of bounds {index_element}, number of elements: {len(self.list_values) - 1}")
 
-        print(f"View Field List - number of elements before deletion: {len(self.list_elements)}")
-        print(f"View Field List - number of values before deletion: {len(self.list_values)}")
-
         target_field: str = self.field_name
         self.parent.controller.handle_field_list_delete_element_button_clicked(target_field, index_element)
 
         # Update list_values
-        print(f"View Field List - After deleting element {self.list_values}")
         self.refresh_list_element_index(self.list_values)
-        print(f"View Field List - number of elements after deletion: {len(self.list_elements)}")
-        print(f"View Field List - number of values after deletion: {len(self.list_values)}")
         return
 
 
@@ -655,27 +637,22 @@ class ViewReferenceFieldListElement(ttk.Frame):
     """
 
     def handle_move_element_up(self) -> None:
-        print(f"Element index: {self.index}")
         self.parent.gui_move_element_up(self.index)
         return
 
     def handle_move_element_down(self) -> None:
-        print(f"Element index: {self.index}")
         self.parent.gui_move_element_down(self.index)
         return
 
     def handle_add_element_below(self) -> None:
-        print(f"Element index: {self.index}")
         self.parent.gui_add_element_below(self.index)
         return
 
     def handle_delete_element(self) -> None:
-        print(f"Element index: {self.index}")
         self.parent.gui_delete_element(self.index)
         return
 
     def handle_field_value_updated(self, variable_name: str, index: str, mode: str) -> None:
-        print(f"Element index: {self.index}")
         new_value: str = self.vars_field_value.get()
         self.parent.handle_field_value_updated(self.index, new_value)
         return
