@@ -373,8 +373,10 @@ class ViewReferenceField(ttk.Frame):
         return
 
     def gui_create_widgets(self, field_name: str) -> None:
-        if field_name == "url":
+        if field_name in ["url", "doi", "issn"]:
             self.label_field_name = ttk.Label(self, text=f"{field_name}")
+        elif field_name == "booktitle":
+            self.label_field_name = ttk.Label(self, text="Book title")
         else:
             self.label_field_name = ttk.Label(self, text=f"{field_name.capitalize()}")
 
