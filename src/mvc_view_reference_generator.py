@@ -149,7 +149,7 @@ class ViewRefGenOptions(ttk.Frame):
         )
         add_range_validation(self.ui_options_start_entry, 0, REFGEN_MAX_START_VALUE, when="key")
 
-        self.ui_options_step_label = ttk.Label(self, text="N° of iterations") 
+        self.ui_options_step_label = ttk.Label(self, text="N° of steps") 
         self.ui_options_step_entry = ttk.Spinbox(
             self, 
             width=15,
