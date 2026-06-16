@@ -135,12 +135,9 @@ class ViewRefGenOptions(ttk.Frame):
         if not self.controller:
             raise Exception("Error: controller not set for ViewRefGenOptions")
         self.ui_options_header_iteration_settings = ttk.Label(self, text="Iteration settings")
-
         self.ui_widget_separator = ttk.Separator(self, orient=tk.HORIZONTAL, bootstyle="secondary")
-
         self.ui_options_doctype_label = ttk.Label(self, text="Document type")
         self.ui_options_doctype_dropdown = ttk.Combobox(self, values=list(DROPDOWN_REFERENCE_TYPES.keys()), textvariable=self.vars_options_doctype_dropdown)
-
         self.ui_options_start_label = ttk.Label(self, text="Start")
         self.ui_options_start_entry = ttk.Spinbox(
             self, 
@@ -167,19 +164,16 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_end_value_label = ttk.Label(self, textvariable=self.vars_options_end_value_label)
 
         self.ui_options_header_preview_label = ttk.Label(self, text="Preview references")
-
+        self.ui_options_reset_fields_button = ttk.Button(self, width=15, text="Reset fields", command=self.controller.handle_reset_fields_button_clicked)
         self.ui_options_generate_button = ttk.Button(self, width=15, text="Generate entries", command=self.controller.handle_generate_button_clicked)
         self.ui_options_clear_fields_button = ttk.Button(self, width=15, text="Clear fields", command=self.controller.handle_clear_fields_button_clicked)
-
         self.ui_options_delete_iteration_button = ttk.Button(self, width=15, text="Delete iteration", command=self.controller.handle_delete_iteration_button_clicked)
-
         self.ui_options_number_iterations_label = ttk.Label(self, textvariable=self.vars_options_number_iterations_label)
-
         self.ui_options_previous_iteration_button = ttk.Button(self, width=15, text="Previous", command=self.controller.handle_previous_button_clicked)
         self.ui_options_next_iteration_button = ttk.Button(self, width=15, text="Next", command=self.controller.handle_next_button_clicked)
 
         self.ui_widget_separator.grid(column=0, row=4, columnspan=4, sticky="sew")
-        self.ui_options_header_iteration_settings.grid(column=0, row=0, sticky="nsew", columnspan=2, padx=(15, 0))
+        self.ui_options_header_iteration_settings.grid(column=0, row=1, sticky="nsew", padx=(15, 0))
         self.ui_options_doctype_label.grid(column=0, row=1, sticky="nsew", padx=(15, 0))
         self.ui_options_doctype_dropdown.grid(column=1, row=1)
         self.ui_options_start_label.grid(column=0, row=2, sticky="nsew", padx=(15, 0))
@@ -190,7 +184,8 @@ class ViewRefGenOptions(ttk.Frame):
         self.ui_options_end_value_label.grid(column=1, row=4)
 
         self.ui_options_header_preview_label.grid(column=2, row=0, sticky="nsew", columnspan=2)
-        self.ui_options_generate_button.grid(column=2, row=1, columnspan=2)
+        self.ui_options_reset_fields_button.grid(column=2, row=1)
+        self.ui_options_generate_button.grid(column=3, row=1)
         self.ui_options_clear_fields_button.grid(column=2, row=2)
         self.ui_options_delete_iteration_button.grid(column=3, row=2)
         self.ui_options_number_iterations_label.grid(column=2, row=3, columnspan=2)

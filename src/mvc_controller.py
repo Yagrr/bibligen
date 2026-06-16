@@ -74,9 +74,10 @@ class Controller:
         last_index = len(self.model.references) - 1
 
         if index_reference_in_view == 0:
-            # Index is the first, disable Delete and Previous button
+            # Index is the first, disable Delete, Previous and Reset Fields buttons
             self.view_options.ui_options_delete_iteration_button.config(state="disabled")
             self.view_options.ui_options_previous_iteration_button.config(state="disabled")
+            self.view_options.ui_options_reset_fields_button.config(state="disabled")
 
             if len(self.model.references) > 1:
                 # More than one reference, enable next button
@@ -95,6 +96,7 @@ class Controller:
             return
 
         # Index is not first, and it's not the last.
+        self.view_options.ui_options_reset_fields_button.config(state="normal")
         self.view_options.ui_options_delete_iteration_button.config(state="normal")
         self.view_options.ui_options_previous_iteration_button.config(state="normal")
         self.view_options.ui_options_next_iteration_button.config(state="normal")
@@ -227,6 +229,17 @@ class Controller:
 
         self.refresh_view_fields_reference_in_view()
         # Disable buttons depending on index in view.
+        self.refresh_view_options_reference_in_view()
+        return
+
+    def handle_reset_fields_button_clicked(self) -> None:
+        """
+        Resets current reference in view to be equal to the first.
+        Useful for when the user modified iterations other than the first.
+        """
+        index_reference_in_view = self.view_options.vars_options_index_reference_in_view.get()
+        self.model.reset_model_reference_fields(index_reference_in_view)
+        self.refresh_view_fields_reference_in_view()
         self.refresh_view_options_reference_in_view()
         return
 

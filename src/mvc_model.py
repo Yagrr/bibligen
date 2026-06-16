@@ -95,37 +95,24 @@ class ModelReferenceDatabase:
         reference.update_field(target_field, new_value)
         return
 
-    # NOTE: Field list interactions
-
-    def update_element_in_reference_field_list(self, target_field: str, index_reference: int, index_list_element: int, new_value: str) -> None:
-        reference = self.get_reference_at_index(index_reference)
-        reference.update_element_in_list_field(target_field, index_list_element, new_value)
-        return
-
-    def add_element_in_reference_field_list_at_index(self, target_field: str, index_reference: int, index_list_element: int):
-        reference = self.get_reference_at_index(index_reference)
-        reference.add_element_to_list_field(target_field, index_list_element)
-        return
-
-    def delete_element_in_reference_field_list_at_index(self, target_field: str, index_reference: int, index_list_element: int):
-        reference = self.get_reference_at_index(index_reference)
-        reference.delete_element_in_list_field(target_field, index_list_element)
-        return
-
-    def move_element_up_in_reference_list_field(self, target_field: str, index_reference: int, index_list_element: int):
-        reference = self.get_reference_at_index(index_reference)
-        reference.move_element_up_in_list_field(target_field, index_list_element)
-        return
-
-    def move_element_down_in_reference_list_field(self, target_field: str, index_reference: int, index_list_element: int):
-        reference = self.get_reference_at_index(index_reference)
-        reference.move_element_down_in_list_field(target_field, index_list_element)
+    def reset_model_reference_fields(self, index: int) -> None:
+        """
+        Resets the field of the current reference in view to be equal to the
+        first reference.
+        """
+        if len(self.references) == 1:
+            return
+        reference_copy = deepcopy(self.references[0])
+        reference_copy.value_iterable += index
+        # Replace fields with pattern
+        reference_copy.replace_pattern_in_fields_with_iterable()
+        self.references[index] = reference_copy
         return
 
     def clear_model_reference_fields(self, index: int) -> None:
         """
-        For all fields - except fields with the pattern, author, and date -
-        clear the field value.
+        For all fields in a reference of a given index clear the field value -
+        except fields with the pattern, author, and date.
         This should only happen if the user chooses to go over the previews
         and modify the fields of an entry after the first.
         If the first reference has no patterns, then iterations cannot happen.
@@ -235,6 +222,32 @@ class ModelReferenceDatabase:
             bib_string.append(reference.convert_fields_to_bib(citation_key))
 
         return "\n".join(bib_string)
+
+    # NOTE: Field list interactions
+    def update_element_in_reference_field_list(self, target_field: str, index_reference: int, index_list_element: int, new_value: str) -> None:
+        reference = self.get_reference_at_index(index_reference)
+        reference.update_element_in_list_field(target_field, index_list_element, new_value)
+        return
+
+    def add_element_in_reference_field_list_at_index(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.add_element_to_list_field(target_field, index_list_element)
+        return
+
+    def delete_element_in_reference_field_list_at_index(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.delete_element_in_list_field(target_field, index_list_element)
+        return
+
+    def move_element_up_in_reference_list_field(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.move_element_up_in_list_field(target_field, index_list_element)
+        return
+
+    def move_element_down_in_reference_list_field(self, target_field: str, index_reference: int, index_list_element: int):
+        reference = self.get_reference_at_index(index_reference)
+        reference.move_element_down_in_list_field(target_field, index_list_element)
+        return
 
         
 
