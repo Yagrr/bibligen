@@ -13,6 +13,7 @@ DEFAULT_OPTIONS_NUMBER_ITERATIONS = 1
 
 # First iteration holds a special role. Any instances of [[value]] is replaced.
 DEFAULT_PATTERN_FIRST_ITERATION = "[[value]]"
+DEFAULT_PATTERN_FIRST_ITERATION_REGEX = r"\[\[value\]\]"
 # Double square brackets, only capturing digit inside. This pattern is used after the first iteration.
 DEFAULT_PATTERN = r"(?:\[\[)\d+(?:\]\])"
 

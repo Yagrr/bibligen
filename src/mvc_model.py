@@ -5,6 +5,7 @@ from .settings import (
     DEFAULT_OPTIONS_START,
     DEFAULT_OPTIONS_NUMBER_ITERATIONS,
     DEFAULT_PATTERN_FIRST_ITERATION,
+    DEFAULT_PATTERN_FIRST_ITERATION_REGEX,
     DEFAULT_PATTERN,
 )
 
@@ -19,7 +20,7 @@ class ModelReferenceDatabase:
     def __init__(self):
         self.vars_iteration_start_value: int = DEFAULT_OPTIONS_START # Replace pattern with iteration_start
         self.vars_iteration_step_value: int = DEFAULT_OPTIONS_NUMBER_ITERATIONS # Iterate by iteration_step
-        self.vars_iterable_string_pattern_first_iteration: str = DEFAULT_PATTERN_FIRST_ITERATION
+        self.vars_iterable_string_pattern_first_iteration: str = DEFAULT_PATTERN_FIRST_ITERATION_REGEX
         self.vars_iterable_string_pattern: str = DEFAULT_PATTERN
         self.references: list[ModelReference] = []
         
@@ -31,6 +32,7 @@ class ModelReferenceDatabase:
 
     def initialise_database(self, item_type: ReferenceType, value_iterable: int, pattern: str):
         self.references.append(ModelReference(item_type, value_iterable, pattern))
+        self.references[0].fields["year"] = "[[value]]"
 
     def add_model_reference(self) -> None:
         """
@@ -259,7 +261,7 @@ class ModelReference:
             # Otherwise replace [[integer]] by the value iterable, which should be updated by +1.
             if DEFAULT_PATTERN_FIRST_ITERATION in field_value:
                 # Replace "[[value]]" since it's a copy of the first iterable.
-                self.fields[field_name] = field_value.replace(DEFAULT_PATTERN_FIRST_ITERATION, f"[[{self.value_iterable}]]")
+                self.fields[field_name] = re.sub(DEFAULT_PATTERN_FIRST_ITERATION_REGEX, f"[[{self.value_iterable}]]", field_value)
             else:
                 self.fields[field_name] = re.sub(self.pattern, f"[[{self.value_iterable}]]", field_value)
 
@@ -370,15 +372,18 @@ class ModelReference:
     def generate_citation_key(self):
         try:
             if self.fields["item_type"] == "@proceedings":
-                author = self.fields["editor"][0]
+                author = self.fields["editor"][0].replace(" ", "")
             else:
-                author = self.fields["author"][0]
+                author = self.fields["author"][0].replace(" ", "")
         except IndexError:
             author = "citation_key"
 
         # Use first three words as title
-        title = "".join(self.fields.get("title", "").split()[:3])
+        title = "".join(self.fields.get("title", "").strip().split()[:3])
+        title = re.sub(r"[^a-zA-Z]", "", title)
+        title = re.sub(self.pattern, str(self.value_iterable), title)
         year = self.fields.get("year", "")
+        year = re.sub(self.pattern, str(self.value_iterable), year)
         return f"{author}{title}{year}"
 
     def convert_fields_to_bib(self, citation_key: str) -> str:
@@ -423,6 +428,7 @@ class ModelReference:
                     bib_fields.append("},\n")
                 case _:
                     # Replace pattern with value iterable without square brackets.
+                    print(f"ModelReference - Replaced pattern: {self.pattern} with {self.value_iterable}")
                     field_value_final = re.sub(self.pattern, str(self.value_iterable), field_value)
                     bib_fields.append(f"\t{field_name} = {{{field_value_final}}}")
                     if field_name == last_field:

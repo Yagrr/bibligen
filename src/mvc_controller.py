@@ -156,7 +156,10 @@ class Controller:
         """
         new_start_value: int = self.view_options.vars_options_iteration_start_entry.get()
         step_value: int = self.view_options.vars_options_iteration_step_entry.get()
-        self.view_options.vars_options_end_value_label.set(new_start_value + step_value)
+        if len(self.model.references) == 1:
+            self.view_options.vars_options_end_value_label.set(new_start_value)
+        else:
+            self.view_options.vars_options_end_value_label.set(new_start_value + step_value)
 
         self.model.update_iteration_start(new_start_value)
         self.refresh_view_fields_reference_in_view()
