@@ -4,7 +4,7 @@ A GUI tool for creating reference entries in bulk.
 
 ## The problem
 
-Creating entries in reference managers for annual reports is very time-consuming: each entry needs to be created one by one, even though the field values are very similar - only differing the year in its title, date, url, etc.
+Creating entries in reference managers for annual reports is very time-consuming: each entry needs to be created one by one, even though the field values are very similar - only differing by year in its title, date, url, etc.
 
 ## The solution
 
