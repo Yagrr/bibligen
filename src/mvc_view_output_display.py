@@ -11,7 +11,7 @@ class WrapperOutputWindow(ttk.Frame):
     def __init__(self, container=None, **kw):
         ttk.Frame.__init__(self, container, **kw)
         self.parent = container
-        self.ui_output_window = ViewOutputWindow(self)
+        self.ui_output_window = ViewOutputWindow(self, autohide=True)
         self.ui_output_window.pack(expand=True, fill=tk.BOTH)
         self.ui_save_to_file = ttk.Button(self, width=10, text="Save to file", command=self.show_save_to_file_dialog)
         self.ui_copy_to_clipboard_button = ttk.Button(self, width=5, text="Copy", command=self.copy_to_clipboard)

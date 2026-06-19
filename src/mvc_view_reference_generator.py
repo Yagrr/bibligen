@@ -267,7 +267,7 @@ class WrapperRefGenFields(ttk.Frame):
         #self._gui_show_layout()
 
     def gui_setup_layout(self) -> None:
-        self.view_refgen_fields = ViewRefGenFields(self)
+        self.view_refgen_fields = ViewRefGenFields(self, autohide=True)
         self.view_refgen_fields.pack(expand=True, fill=tk.BOTH)
 
     def _gui_show_layout(self) -> None:
@@ -350,7 +350,7 @@ class ViewReferenceField(ttk.Frame):
         self.setup_view_variables(field_value)
         self.gui_create_widgets(field_name)
 
-        self.pack(side=tk.TOP, fill=tk.X, padx=0, pady=25, anchor="n")
+        self.pack(side=tk.TOP, fill=tk.X, padx=0, pady=8, anchor="n")
 
     def get_field_value(self) -> str:
         return self.vars_field_value.get()
@@ -417,7 +417,7 @@ class ViewReferenceFieldList(ttk.Frame):
         self.field_name: str = field_name
 
         self.refresh_list_element_index(self.list_values)
-        self.pack(side=tk.TOP, fill=tk.X, padx=0, pady=25, anchor="n")
+        self.pack(side=tk.TOP, fill=tk.X, padx=0, pady=10, anchor="n")
 
     def gui_create_widgets(self, list_values: list[str]) -> None:
         """
